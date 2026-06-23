@@ -1,0 +1,68 @@
+erDiagram
+    USER {
+        int id PK
+        string username
+        string email
+        string password
+        string bio
+        string profile_picture
+        datetime created_at
+    }
+
+    QUESTION {
+        int id PK
+        int author_id FK
+        string title
+        text body
+        datetime created_at
+        datetime updated_at
+    }
+
+    ANSWER {
+        int id PK
+        int question_id FK
+        int author_id FK
+        text body
+        datetime created_at
+        datetime updated_at
+    }
+
+    COMMENT {
+        int id PK
+        int answer_id FK
+        int author_id FK
+        int parent_id FK
+        text body
+        datetime created_at
+        datetime updated_at
+    }
+
+    LIKE {
+        int id PK
+        int user_id FK
+        int question_id FK
+        int answer_id FK
+        datetime created_at
+    }
+
+    FOLLOW {
+        int id PK
+        int follower_id FK
+        int following_id FK
+        datetime created_at
+    }
+
+    USER ||--o{ QUESTION : asks
+    USER ||--o{ ANSWER : writes
+    QUESTION ||--o{ ANSWER : has
+
+    USER ||--o{ COMMENT : writes
+    ANSWER ||--o{ COMMENT : has
+    COMMENT ||--o{ COMMENT : replies_to
+
+    USER ||--o{ LIKE : gives
+    QUESTION ||--o{ LIKE : receives
+    ANSWER ||--o{ LIKE : receives
+
+    USER ||--o{ FOLLOW : follows
+    USER ||--o{ FOLLOW : followed_by

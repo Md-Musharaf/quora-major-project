@@ -1,3 +1,6 @@
+# Quora Clone ER Diagram
+
+```mermaid
 erDiagram
     USER {
         int id PK
@@ -66,3 +69,4 @@ erDiagram
 
     USER ||--o{ FOLLOW : follows
     USER ||--o{ FOLLOW : followed_by
+```

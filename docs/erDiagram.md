@@ -1,4 +1,4 @@
-# Quora Clone ER Diagram
+# Quora ER Diagram
 
 ```mermaid
 erDiagram

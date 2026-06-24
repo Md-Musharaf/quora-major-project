@@ -3,7 +3,7 @@
 ## Persona 1: College Student Seeking Knowledge
 
 ### Name
-Aman Kumar
+Pankaj
 
 ### Age
 21
@@ -32,7 +32,7 @@ B.Tech Student
 ## Persona 2: Software Engineer Sharing Expertise
 
 ### Name
-Priya Sharma
+Md. Musharaf
 
 ### Age
 28

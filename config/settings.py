@@ -22,6 +22,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "tailwind",
     "theme",
+    "users",
+    "questions",
+    "answers",
+    "interactions",
 ]
 
 MIDDLEWARE = [
@@ -93,3 +97,5 @@ TAILWIND_APP_NAME = "theme"
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+AUTH_USER_MODEL = "users.User"

@@ -1,4 +1,94 @@
 from django.contrib import admin
-from .models import User
+from django.contrib.auth.admin import UserAdmin
 
-admin.site.register(User)
+from .models import Profile, User
+
+
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    model = User
+
+    list_display = (
+        "email",
+        "is_staff",
+        "is_active",
+    )
+
+    ordering = ("email",)
+
+    search_fields = ("email",)
+
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "email",
+                    "password",
+                )
+            },
+        ),
+        (
+            "Personal information",
+            {
+                "fields": (
+                    "first_name",
+                    "last_name",
+                )
+            },
+        ),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                )
+            },
+        ),
+        (
+            "Important dates",
+            {
+                "fields": (
+                    "last_login",
+                    "date_joined",
+                )
+            },
+        ),
+    )
+
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "email",
+                    "password1",
+                    "password2",
+                    "is_staff",
+                    "is_active",
+                ),
+            },
+        ),
+    )
+
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = (
+        "display_name",
+        "user",
+        "profession",
+        "location",
+        "created_at",
+    )
+
+    search_fields = (
+        "display_name",
+        "user__email",
+        "profession",
+    )

@@ -1,15 +1,10 @@
-{% load static tailwind_tags %}
+{% extends 'layout.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quora Home</title>
-    {% tailwind_css %}
-  </head>
-  <body>
-    <h1 class="bg-gray-800 text-white text-4xl p-10 font-sans">This is the Home Page for Quora</h1>
-    <h3>By Md. Musharaf</h3>
-  </body>
-</html>
+{% block title %}
+  Home page
+{% endblock %}
+
+{% block content %}
+  <h1 class="bg-gray-400 text-4xl p-10 font-bold text-center">Quora | Home Page</h1>
+
+{% endblock %}

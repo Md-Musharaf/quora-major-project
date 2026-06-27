@@ -1,0 +1,35 @@
+{% load static tailwind_tags %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}
+        Defalt Value
+      {% endblock %}
+    </title>
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+    {% tailwind_css %}
+  </head>
+  <body>
+    <nav class="bg-black text-white p-4 text-2xl">Quora Navbar</nav>
+    {% if user.is_authenticated %}
+      <span>Welcome, {{ user.profile.display_name }}</span>
+
+      <a href="{% url 'users:logout' %}">Logout</a>
+
+      <a href="{% url 'users:profile' %}">Profile</a>
+    {% else %}
+      <a href="{% url 'users:login' %}">Login</a>
+
+      <a href="{% url 'users:register' %}">Register</a>
+    {% endif %}
+
+    {% block content %}
+
+    {% endblock %}
+  </body>
+</html>

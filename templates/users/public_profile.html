@@ -1,0 +1,54 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+  {{ profile.display_name }}
+{% endblock %}
+
+{% block content %}
+  <div class="max-w-2xl mx-auto mt-10 bg-white p-6 rounded-lg shadow-md">
+    <div class="flex items-center gap-5">
+      {% if profile.profile_picture %}
+        <img src="{{ profile.profile_picture.url }}" alt="{{ profile.display_name }}" class="w-24 h-24 rounded-full object-cover" />
+      {% else %}
+        <div class="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center">No Image</div>
+      {% endif %}
+
+      <div>
+        <h1 class="text-2xl font-bold">{{ profile.display_name }}</h1>
+
+        <p class="text-gray-600">{{ profile_user.email }}</p>
+      </div>
+    </div>
+
+    <div class="mt-6 space-y-3">
+      <p>
+        <strong>Bio:</strong>
+        {{ profile.bio|default:'Not added' }}
+      </p>
+
+      <p>
+        <strong>Location:</strong>
+        {{ profile.location|default:'Not added' }}
+      </p>
+
+      <p>
+        <strong>Profession:</strong>
+        {{ profile.profession|default:'Not added' }}
+      </p>
+
+      <p>
+        <strong>Website:</strong>
+
+        {% if profile.website %}
+          <a href="{{ profile.website }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">{{ profile.website }}</a>
+        {% else %}
+          Not added
+        {% endif %}
+      </p>
+    </div>
+
+    {% if request.user == profile_user %}
+      <a href="{% url 'users:edit_profile' %}" class="inline-block mt-6 bg-blue-600 text-black px-4 py-2 rounded-md">Edit Profile</a>
+    {% endif %}
+  </div>
+{% endblock %}

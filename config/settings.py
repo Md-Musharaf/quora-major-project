@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "tailwind",
     "theme",
-    "users",
+    "users.apps.UsersConfig",
     "questions",
     "answers",
     "interactions",
@@ -99,3 +99,6 @@ INTERNAL_IPS = [
 ]
 
 AUTH_USER_MODEL = "users.User"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")

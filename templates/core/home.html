@@ -1,10 +1,47 @@
 {% extends 'layout.html' %}
 
 {% block title %}
-  Home page
+  Home
 {% endblock %}
 
 {% block content %}
-  <h1 class="bg-gray-400 text-4xl p-10 font-bold text-center">Quora | Home Page</h1>
+  <div class="mx-auto max-w-3xl px-4 py-8">
+    <div class="mb-6 flex items-center justify-between">
+      <h1 class="text-2xl font-bold text-gray-900">Questions</h1>
 
+      {% if user.is_authenticated %}
+        <a href="{% url 'questions:create_question' %}" class="rounded-md bg-red-700 px-4 py-2 text-white hover:bg-red-800">Ask Question</a>
+      {% endif %}
+    </div>
+
+    <div class="space-y-5">
+      {% for question in questions %}
+        <article class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+          <div class="mb-3 flex items-center gap-3">
+            {% if question.author.profile.profile_picture %}
+              <img src="{{ question.author.profile.profile_picture.url }}" alt="{{ question.author.profile.display_name }}" class="h-10 w-10 rounded-full object-cover" />
+            {% else %}
+              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 font-bold text-gray-700">{{ question.author.profile.display_name|first|upper }}</div>
+            {% endif %}
+
+            <div>
+              <a href="{% url 'users:public_profile' user_id=question.author.id %}" class="font-semibold text-gray-900 hover:underline">{{ question.author.profile.display_name }}</a>
+
+              <p class="text-sm text-gray-500">Asked {{ question.created_at|timesince }} ago</p>
+            </div>
+          </div>
+
+          <h2 class="mb-2 text-xl font-bold text-gray-900"><a href="{% url 'questions:detail' question.id %}" class="hover:text-red-700 hover:underline">{{ question.title }}</a></h2>
+
+          {% if question.description %}
+            <p class="text-gray-700">{{ question.description|truncatewords:35 }}</p>
+          {% endif %}
+        </article>
+      {% empty %}
+        <div class="rounded-lg bg-white p-8 text-center shadow-sm">
+          <p class="text-gray-500">No questions have been posted yet.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
 {% endblock %}

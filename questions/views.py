@@ -1,3 +1,94 @@
-from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404, redirect, render
 
-# Create your views here.
+from .forms import QuestionForm
+from .models import Question
+
+
+@login_required
+def create_question(request):
+    if request.method == "POST":
+        form = QuestionForm(request.POST)
+
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.author = request.user
+            question.save()
+
+            return redirect("home")
+    else:
+        form = QuestionForm()
+
+    return render(
+        request,
+        "questions/create_question.html",
+        {"form": form},
+    )
+
+
+def question_detail(request, question_id):
+    question = get_object_or_404(
+        Question.objects.select_related(
+            "author",
+            "author__profile",
+        ),
+        id=question_id,
+    )
+
+    return render(
+        request,
+        "questions/question_detail.html",
+        {"question": question},
+    )
+
+
+@login_required
+def edit_question(request, question_id):
+    question = get_object_or_404(Question, id=question_id)
+
+    if question.author != request.user:
+        raise PermissionDenied
+
+    if request.method == "POST":
+        form = QuestionForm(
+            request.POST,
+            instance=question,
+        )
+
+        if form.is_valid():
+            form.save()
+
+            return redirect(
+                "questions:detail",
+                question_id=question.id,
+            )
+    else:
+        form = QuestionForm(instance=question)
+
+    return render(
+        request,
+        "questions/edit_question.html",
+        {
+            "form": form,
+            "question": question,
+        },
+    )
+
+
+@login_required
+def delete_question(request, question_id):
+    question = get_object_or_404(Question, id=question_id)
+
+    if question.author != request.user:
+        raise PermissionDenied
+
+    if request.method == "POST":
+        question.delete()
+        return redirect("home")
+
+    return render(
+        request,
+        "questions/delete_question.html",
+        {"question": question},
+    )

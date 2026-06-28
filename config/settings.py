@@ -117,24 +117,24 @@ CLOUDINARY_STORAGE = {
 
 cloudinary_url = config("CLOUDINARY_URL", default="").strip()
 
-if cloudinary_url or all(CLOUDINARY_STORAGE.values()):
-    STORAGES = {
-        "default": {
-            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "cloudinary_storage.storage.StaticCloudinaryStorage",
-        },
-    }
-else:
-    STORAGES = {
-        "default": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-        },
-        "staticfiles": {
-            "BACKEND": ("django.contrib.staticfiles.storage.StaticFilesStorage"),
-        },
-    }
+use_cloudinary = bool(
+    cloudinary_url or all(CLOUDINARY_STORAGE.values())
+)
+
+STORAGES = {
+    "default": {
+        "BACKEND": (
+            "cloudinary_storage.storage.MediaCloudinaryStorage"
+            if use_cloudinary
+            else "django.core.files.storage.FileSystemStorage"
+        ),
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
+    },
+}
 
 TAILWIND_APP_NAME = "theme"
 

@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     "theme",
     "users.apps.UsersConfig",
     "questions",
-    "answers",
     "interactions",
 ]
 

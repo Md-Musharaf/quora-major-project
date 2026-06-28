@@ -1,6 +1,16 @@
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import (
+    BooleanField,
+    Count,
+    Exists,
+    OuterRef,
+    Prefetch,
+    Value,
+)
 from django.shortcuts import get_object_or_404, redirect, render
+
+from interactions.models import AnswerVote
 
 from .forms import AnswerForm, QuestionForm
 from .models import Answer, Question
@@ -28,13 +38,39 @@ def create_question(request):
 
 
 def question_detail(request, question_id):
+    answers = Answer.objects.select_related(
+        "author",
+        "author__profile",
+    ).annotate(
+        vote_count=Count("votes", distinct=True),
+    )
+
+    if request.user.is_authenticated:
+        answers = answers.annotate(
+            user_has_voted=Exists(
+                AnswerVote.objects.filter(
+                    answer_id=OuterRef("pk"),
+                    user=request.user,
+                )
+            )
+        )
+    else:
+        answers = answers.annotate(
+            user_has_voted=Value(
+                False,
+                output_field=BooleanField(),
+            )
+        )
+
     question = get_object_or_404(
         Question.objects.select_related(
             "author",
             "author__profile",
         ).prefetch_related(
-            "answers__author",
-            "answers__author__profile",
+            Prefetch(
+                "answers",
+                queryset=answers,
+            )
         ),
         id=question_id,
     )
@@ -58,9 +94,17 @@ def question_detail(request, question_id):
     else:
         answer_form = AnswerForm()
 
+    user_has_voted = False
+
+    if request.user.is_authenticated:
+        user_has_voted = question.votes.filter(
+            user=request.user,
+        ).exists()
+
     context = {
         "question": question,
         "answer_form": answer_form,
+        "user_has_voted": user_has_voted,
     }
 
     return render(

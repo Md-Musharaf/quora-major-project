@@ -2,8 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import QuestionForm
-from .models import Question
+from .forms import AnswerForm, QuestionForm
+from .models import Answer, Question
 
 
 @login_required
@@ -32,14 +32,41 @@ def question_detail(request, question_id):
         Question.objects.select_related(
             "author",
             "author__profile",
+        ).prefetch_related(
+            "answers__author",
+            "answers__author__profile",
         ),
         id=question_id,
     )
 
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            return redirect("users:login")
+
+        answer_form = AnswerForm(request.POST)
+
+        if answer_form.is_valid():
+            answer = answer_form.save(commit=False)
+            answer.question = question
+            answer.author = request.user
+            answer.save()
+
+            return redirect(
+                "questions:detail",
+                question_id=question.id,
+            )
+    else:
+        answer_form = AnswerForm()
+
+    context = {
+        "question": question,
+        "answer_form": answer_form,
+    }
+
     return render(
         request,
         "questions/question_detail.html",
-        {"question": question},
+        context,
     )
 
 
@@ -91,4 +118,67 @@ def delete_question(request, question_id):
         request,
         "questions/delete_question.html",
         {"question": question},
+    )
+
+
+@login_required
+def edit_answer(request, answer_id):
+    answer = get_object_or_404(
+        Answer.objects.select_related("question", "author"),
+        id=answer_id,
+    )
+
+    if answer.author != request.user:
+        raise PermissionDenied
+
+    if request.method == "POST":
+        form = AnswerForm(
+            request.POST,
+            instance=answer,
+        )
+
+        if form.is_valid():
+            form.save()
+
+            return redirect(
+                "questions:detail",
+                question_id=answer.question.id,
+            )
+    else:
+        form = AnswerForm(instance=answer)
+
+    return render(
+        request,
+        "questions/edit_answer.html",
+        {
+            "form": form,
+            "answer": answer,
+        },
+    )
+
+
+@login_required
+def delete_answer(request, answer_id):
+    answer = get_object_or_404(
+        Answer.objects.select_related("question", "author"),
+        id=answer_id,
+    )
+
+    if answer.author != request.user:
+        raise PermissionDenied
+
+    question_id = answer.question.id
+
+    if request.method == "POST":
+        answer.delete()
+
+        return redirect(
+            "questions:detail",
+            question_id=question_id,
+        )
+
+    return render(
+        request,
+        "questions/delete_answer.html",
+        {"answer": answer},
     )

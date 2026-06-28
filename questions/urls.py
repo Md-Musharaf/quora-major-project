@@ -4,7 +4,6 @@ from . import views
 
 app_name = "questions"
 
-
 urlpatterns = [
     path(
         "ask/",
@@ -25,5 +24,15 @@ urlpatterns = [
         "<int:question_id>/delete/",
         views.delete_question,
         name="delete",
+    ),
+    path(
+        "answers/<int:answer_id>/edit/",
+        views.edit_answer,
+        name="edit_answer",
+    ),
+    path(
+        "answers/<int:answer_id>/delete/",
+        views.delete_answer,
+        name="delete_answer",
     ),
 ]

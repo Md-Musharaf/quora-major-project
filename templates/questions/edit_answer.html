@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+  Edit Answer
+{% endblock %}
+
+{% block content %}
+  <div class="mx-auto max-w-2xl px-4 py-8">
+    <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <h1 class="mb-6 text-2xl font-bold text-gray-900">Edit Answer</h1>
+
+      <p class="mb-5 text-gray-600">
+        Answering:
+        <span class="font-semibold text-gray-900">{{ answer.question.title }}</span>
+      </p>
+
+      <form method="POST">
+        {% csrf_token %}
+
+        {{ form.content }}
+
+        {% for error in form.content.errors %}
+          <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+        {% endfor %}
+
+        <div class="mt-5 flex items-center gap-3">
+          <button type="submit" class="rounded-md bg-red-700 px-5 py-2 text-white hover:bg-red-800">Save Changes</button>
+
+          <a href="{% url 'questions:detail' answer.question.id %}" class="rounded-md border border-gray-300 px-5 py-2 text-gray-700 hover:bg-gray-100">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

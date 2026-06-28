@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+  Delete Answer
+{% endblock %}
+
+{% block content %}
+  <div class="mx-auto max-w-xl px-4 py-8">
+    <div class="rounded-lg border border-red-200 bg-white p-6 shadow-sm">
+      <h1 class="mb-4 text-2xl font-bold text-red-700">Delete Answer</h1>
+
+      <p class="mb-4 text-gray-700">Are you sure you want to delete this answer?</p>
+
+      <div class="mb-6 rounded-md bg-gray-100 p-4 text-gray-700">{{ answer.content|truncatewords:30 }}</div>
+
+      <form method="POST">
+        {% csrf_token %}
+
+        <div class="flex items-center gap-3">
+          <button type="submit" class="rounded-md bg-red-700 px-5 py-2 text-white hover:bg-red-800">Yes, Delete</button>
+
+          <a href="{% url 'questions:detail' answer.question.id %}" class="rounded-md border border-gray-300 px-5 py-2 text-gray-700 hover:bg-gray-100">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

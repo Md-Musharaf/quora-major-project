@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.urls import reverse
 
 
 class Question(models.Model):
@@ -15,6 +16,12 @@ class Question(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+    def get_absolute_url(self):
+        return reverse(
+            "questions:detail",
+            kwargs={"question_id": self.pk},
+        )
 
     def __str__(self):
         return self.title

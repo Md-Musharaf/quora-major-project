@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends 'layout.html' %}
 
 {% block title %}
   Ask Question
@@ -6,47 +6,32 @@
 
 {% block content %}
   <div class="mx-auto mt-8 max-w-2xl rounded-lg bg-white p-6 shadow">
-    <h1 class="mb-6 text-2xl font-bold">
-      Ask a Question
-    </h1>
+    <h1 class="mb-6 text-2xl font-bold">Ask a Question</h1>
 
     <form method="POST">
       {% csrf_token %}
 
       <div class="mb-4">
-        <label class="mb-2 block font-semibold">
-          Question
-        </label>
+        <label class="mb-2 block font-semibold">Question</label>
 
         {{ form.title }}
 
         {% for error in form.title.errors %}
-          <p class="mt-1 text-sm text-red-600">
-            {{ error }}
-          </p>
+          <p class="mt-1 text-sm text-red-600">{{ error }}</p>
         {% endfor %}
       </div>
 
       <div class="mb-4">
-        <label class="mb-2 block font-semibold">
-          Description
-        </label>
+        <label class="mb-2 block font-semibold">Description</label>
 
         {{ form.description }}
 
         {% for error in form.description.errors %}
-          <p class="mt-1 text-sm text-red-600">
-            {{ error }}
-          </p>
+          <p class="mt-1 text-sm text-red-600">{{ error }}</p>
         {% endfor %}
       </div>
 
-      <button
-        type="submit"
-        class="rounded-md bg-red-700 px-5 py-2 text-white hover:bg-red-800"
-      >
-        Post Question
-      </button>
+      <button type="submit" class="rounded-md bg-red-700 px-5 py-2 text-white hover:bg-red-800">Post Question</button>
     </form>
   </div>
 {% endblock %}

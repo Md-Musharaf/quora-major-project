@@ -15,6 +15,8 @@ from interactions.models import AnswerVote
 from .forms import AnswerForm, QuestionForm
 from .models import Answer, Question
 
+from comments.models import Comment
+
 
 @login_required
 def create_question(request):
@@ -38,11 +40,26 @@ def create_question(request):
 
 
 def question_detail(request, question_id):
-    answers = Answer.objects.select_related(
+    comments = Comment.objects.select_related(
         "author",
         "author__profile",
-    ).annotate(
-        vote_count=Count("votes", distinct=True),
+    ).order_by("created_at")
+
+    answers = (
+        Answer.objects.select_related(
+            "author",
+            "author__profile",
+        )
+        .prefetch_related(
+            Prefetch(
+                "comments",
+                queryset=comments,
+                to_attr="all_comments",
+            )
+        )
+        .annotate(
+            vote_count=Count("votes", distinct=True),
+        )
     )
 
     if request.user.is_authenticated:
@@ -74,6 +91,24 @@ def question_detail(request, question_id):
         ),
         id=question_id,
     )
+
+    # Build the nested comment tree for every answer.
+    for answer in question.answers.all():
+        comments_by_id = {comment.id: comment for comment in answer.all_comments}
+
+        for comment in answer.all_comments:
+            comment.thread_replies = []
+
+        root_comments = []
+
+        for comment in answer.all_comments:
+            if comment.parent_id and comment.parent_id in comments_by_id:
+                parent = comments_by_id[comment.parent_id]
+                parent.thread_replies.append(comment)
+            else:
+                root_comments.append(comment)
+
+        answer.root_comments = root_comments
 
     if request.method == "POST":
         if not request.user.is_authenticated:

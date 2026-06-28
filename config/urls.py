@@ -9,6 +9,7 @@ urlpatterns = [
     path("users/", include("users.urls")),
     path("questions/", include("questions.urls")),
     path("interactions/", include("interactions.urls")),
+    path("comments/", include("comments.urls")),
 ]
 
 if settings.DEBUG:

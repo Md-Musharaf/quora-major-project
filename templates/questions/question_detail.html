@@ -46,19 +46,11 @@
                 class="flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition
                 {% if user_has_voted %}
                   
-                  
-                  
                   border-red-600 bg-red-50 text-red-600
-
-
 
                 {% else %}
                   
-                  
-                  
                   border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:text-red-600
-
-
 
                 {% endif %}">
                 <span aria-hidden="true">▲</span>
@@ -74,10 +66,7 @@
             <a href="{% url 'users:login' %}?next={{ request.path }}" class="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-red-500 hover:text-red-600">Log in to upvote</a>
           {% endif %}
 
-          <span class="text-sm text-gray-500">
-            {{ vote_count }}
-            upvote{{ vote_count|pluralize }}
-          </span>
+          <span class="text-sm text-gray-500">{{ vote_count }} upvote{{ vote_count|pluralize }}</span>
         </div>
       {% endwith %}
 
@@ -127,7 +116,7 @@
 
       <div class="space-y-5">
         {% for answer in question.answers.all %}
-          <article class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <article id="answer-{{ answer.id }}" class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
             <!-- Answer author -->
             <div class="mb-4 flex items-center gap-3">
               {% if answer.author.profile.profile_picture %}
@@ -152,17 +141,17 @@
                 <form method="POST" action="{% url 'interactions:toggle_answer_vote' answer.id %}">
                   {% csrf_token %}
 
-                  <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}#answer-{{ answer.id }}" />
 
                   <button type="submit"
                     class="flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition
-        {% if answer.user_has_voted %}
+                    {% if answer.user_has_voted %}
                       
-          border-red-600 bg-red-50 text-red-600
+                      border-red-600 bg-red-50 text-red-600
 
                     {% else %}
                       
-          border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:text-red-600
+                      border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:text-red-600
 
                     {% endif %}">
                     <span aria-hidden="true">▲</span>
@@ -182,6 +171,41 @@
                 {{ answer.vote_count }}
                 upvote{{ answer.vote_count|pluralize }}
               </span>
+            </div>
+
+            <!-- Comments section -->
+            <div class="mt-5 border-t border-gray-200 pt-4">
+              <h4 class="mb-3 text-sm font-semibold text-gray-800">Comments</h4>
+
+              <!-- Top-level comment form -->
+              {% if user.is_authenticated %}
+                <form method="POST" action="{% url 'comments:create_comment' answer.id %}" class="mb-5">
+                  {% csrf_token %}
+
+                  <textarea name="content" rows="2" maxlength="1000" required placeholder="Add a comment..." class="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}#answer-{{ answer.id }}" />
+
+                  <div class="mt-2 flex justify-end">
+                    <button type="submit" class="rounded-full bg-blue-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-blue-700">Comment</button>
+                  </div>
+                </form>
+              {% else %}
+                <p class="mb-4 text-sm text-gray-500">
+                  <a href="{% url 'users:login' %}?next={{ request.get_full_path|urlencode }}" class="font-medium text-blue-600 hover:underline">Log in</a>
+
+                  to comment.
+                </p>
+              {% endif %}
+
+              <!-- Nested comments -->
+              <div class="space-y-4">
+                {% for comment in answer.root_comments %}
+                  {% include 'comments/comment_item.html' with comment=comment answer=answer %}
+                {% empty %}
+                  <p class="text-sm text-gray-500">No comments yet.</p>
+                {% endfor %}
+              </div>
             </div>
 
             <!-- Answer author controls -->

@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "users.apps.UsersConfig",
     "questions",
     "interactions",
+    "comments.apps.CommentsConfig",
 ]
 
 MIDDLEWARE = [
@@ -66,10 +67,7 @@ DB_HOST = config("DB_HOST", default="localhost")
 DB_PORT = config("DB_PORT", default=5432, cast=int)
 DB_NAME = config("DB_NAME")
 
-DATABASE_URL = (
-    f"postgresql://{DB_USER}:{DB_PASSWORD}"
-    f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
+DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}" f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 DATABASES = {
     "default": dj_database_url.config(
@@ -116,9 +114,7 @@ CLOUDINARY_STORAGE = {
 
 cloudinary_url = config("CLOUDINARY_URL", default="").strip()
 
-use_cloudinary = bool(
-    cloudinary_url or all(CLOUDINARY_STORAGE.values())
-)
+use_cloudinary = bool(cloudinary_url or all(CLOUDINARY_STORAGE.values()))
 
 STORAGES = {
     "default": {
@@ -129,9 +125,7 @@ STORAGES = {
         ),
     },
     "staticfiles": {
-        "BACKEND": (
-            "whitenoise.storage.CompressedManifestStaticFilesStorage"
-        ),
+        "BACKEND": ("whitenoise.storage.CompressedManifestStaticFilesStorage"),
     },
 }
 

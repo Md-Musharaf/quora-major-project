@@ -21,7 +21,10 @@ from comments.models import Comment
 @login_required
 def create_question(request):
     if request.method == "POST":
-        form = QuestionForm(request.POST)
+        form = QuestionForm(
+            request.POST,
+            request.FILES,
+        )
 
         if form.is_valid():
             question = form.save(commit=False)
@@ -159,6 +162,7 @@ def edit_question(request, question_id):
     if request.method == "POST":
         form = QuestionForm(
             request.POST,
+            request.FILES,
             instance=question,
         )
 

@@ -33,6 +33,13 @@
         <p class="italic text-gray-500">No additional details were provided.</p>
       {% endif %}
 
+      <!-- Question image -->
+      {% if question.image %}
+        <div class="mt-5 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+          <img src="{{ question.image.url }}" alt="Image attached to {{ question.title }}" class="max-h-[600px] w-full object-contain" />
+        </div>
+      {% endif %}
+
       <!-- Question voting -->
       {% with vote_count=question.votes.count %}
         <div class="mt-6 flex flex-wrap items-center gap-3 border-t border-gray-200 pt-4">
@@ -46,11 +53,23 @@
                 class="flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition
                 {% if user_has_voted %}
                   
+                  
+                  
+                  
                   border-red-600 bg-red-50 text-red-600
+
+
+
 
                 {% else %}
                   
+                  
+                  
+                  
                   border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:text-red-600
+
+
+
 
                 {% endif %}">
                 <span aria-hidden="true">▲</span>
@@ -147,11 +166,23 @@
                     class="flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition
                     {% if answer.user_has_voted %}
                       
+                      
+                      
+                      
                       border-red-600 bg-red-50 text-red-600
+
+
+
 
                     {% else %}
                       
+                      
+                      
+                      
                       border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:text-red-600
+
+
+
 
                     {% endif %}">
                     <span aria-hidden="true">▲</span>

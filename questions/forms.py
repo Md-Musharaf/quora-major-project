@@ -6,7 +6,12 @@ from .models import Answer, Question
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ["title", "description"]
+
+        fields = [
+            "title",
+            "description",
+            "image",
+        ]
 
         widgets = {
             "title": forms.TextInput(
@@ -18,6 +23,11 @@ class QuestionForm(forms.ModelForm):
                 attrs={
                     "placeholder": "Add more details about your question",
                     "rows": 5,
+                }
+            ),
+            "image": forms.ClearableFileInput(
+                attrs={
+                    "accept": "image/*",
                 }
             ),
         }

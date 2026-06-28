@@ -9,7 +9,7 @@
     <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
       <h1 class="mb-6 text-2xl font-bold text-gray-900">Edit Question</h1>
 
-      <form method="POST">
+      <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
         <div class="mb-5">
@@ -28,6 +28,27 @@
           {{ form.description }}
 
           {% for error in form.description.errors %}
+            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <div class="mb-5">
+          <label for="{{ form.image.id_for_label }}" class="mb-2 block font-semibold text-gray-700">
+            Question Image
+            <span class="font-normal text-gray-500">(optional)</span>
+          </label>
+
+          {% if question.image %}
+            <div class="mb-3 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+              <img src="{{ question.image.url }}" alt="Current image for {{ question.title }}" class="max-h-72 w-full object-contain" />
+            </div>
+
+            <p class="mb-2 text-sm text-gray-500">Select another image to replace the current one, or use the clear option to remove it.</p>
+          {% endif %}
+
+          {{ form.image }}
+
+          {% for error in form.image.errors %}
             <p class="mt-1 text-sm text-red-600">{{ error }}</p>
           {% endfor %}
         </div>

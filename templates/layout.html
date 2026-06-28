@@ -18,6 +18,8 @@
     {% if user.is_authenticated %}
       <span>Welcome, {{ user.profile.display_name }}</span>
 
+      <a href="{% url 'home' %}">Home</a>
+
       <a href="{% url 'users:logout' %}">Logout</a>
 
       <a href="{% url 'users:profile' %}">Profile</a>

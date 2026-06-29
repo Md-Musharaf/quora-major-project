@@ -11,6 +11,14 @@
     <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
 
+      {% if form.non_field_errors %}
+        <div class="rounded-lg border border-red-300 bg-red-50 p-3">
+          {% for error in form.non_field_errors %}
+            <p class="text-sm text-red-600">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+
       <div class="mb-4">
         <label class="mb-2 block font-semibold">Question</label>
 
@@ -44,15 +52,30 @@
         {% endfor %}
       </div>
 
-      {% comment %}Topics{% endcomment %}
-      <div>
-        <label class="mb-2 block text-sm font-semibold text-gray-700">Select topics</label>
+      <!-- Existing topics -->
+      <div class="space-y-2">
+        <label class="block text-sm font-semibold text-gray-700">{{ form.existing_topics.label }}</label>
 
-        <div class="space-y-2 rounded-lg border border-gray-300 p-4">{{ form.topics }}</div>
+        <div class="grid grid-cols-2 gap-3 rounded-lg border border-gray-300 p-4 md:grid-cols-3">{{ form.existing_topics }}</div>
 
-        {% if form.topics.errors %}
-          <p class="mt-1 text-sm text-red-600">{{ form.topics.errors }}</p>
+        {% for error in form.existing_topics.errors %}
+          <p class="text-sm text-red-600">{{ error }}</p>
+        {% endfor %}
+      </div>
+
+      <!-- New topics -->
+      <div class="space-y-2">
+        <label for="{{ form.new_topics.id_for_label }}" class="block text-sm font-semibold text-gray-700">{{ form.new_topics.label }}</label>
+
+        <input type="text" name="{{ form.new_topics.html_name }}" id="{{ form.new_topics.id_for_label }}" value="{{ form.new_topics.value|default_if_none:'' }}" placeholder="Example: Django, Python, Web Development" class="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500" />
+
+        {% if form.new_topics.help_text %}
+          <p class="text-sm text-gray-500">{{ form.new_topics.help_text }}</p>
         {% endif %}
+
+        {% for error in form.new_topics.errors %}
+          <p class="text-sm text-red-600">{{ error }}</p>
+        {% endfor %}
       </div>
 
       <button type="submit" class="rounded-md bg-red-700 px-5 py-2 text-white hover:bg-red-800">Post Question</button>

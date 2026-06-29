@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from .models import Profile, User
+from .models import Profile, User, UserFollow
 
 
 @admin.register(User)
@@ -91,4 +92,23 @@ class ProfileAdmin(admin.ModelAdmin):
         "display_name",
         "user__email",
         "profession",
+    )
+
+
+@admin.register(UserFollow)
+class UserFollowAdmin(admin.ModelAdmin):
+    list_display = (
+        "follower",
+        "following",
+        "created_at",
+    )
+
+    search_fields = (
+        "follower__email",
+        "following__email",
+    )
+
+    list_select_related = (
+        "follower",
+        "following",
     )

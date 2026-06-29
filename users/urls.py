@@ -15,4 +15,9 @@ urlpatterns = [
         views.public_profile_view,
         name="public_profile",
     ),
+    path(
+        "profile/<int:user_id>/follow/",
+        views.toggle_follow_view,
+        name="toggle_follow",
+    ),
 ]

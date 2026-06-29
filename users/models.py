@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from .managers import UserManager
+from django.conf import settings
 
 
 class User(AbstractUser):
@@ -41,3 +42,40 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.display_name
+
+
+class UserFollow(models.Model):
+    follower = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="following_relationships",
+    )
+
+    following = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="follower_relationships",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["follower", "following"],
+                name="unique_user_follow",
+            ),
+            models.CheckConstraint(
+                condition=~models.Q(
+                    follower=models.F("following"),
+                ),
+                name="prevent_self_follow",
+            ),
+        ]
+
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.follower} follows " f"{self.following}"
+
+

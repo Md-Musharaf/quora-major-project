@@ -31,6 +31,8 @@ def create_question(request):
             question.author = request.user
             question.save()
 
+            form.save_m2m()
+
             return redirect("home")
     else:
         form = QuestionForm()
@@ -87,10 +89,11 @@ def question_detail(request, question_id):
             "author",
             "author__profile",
         ).prefetch_related(
+            "topics",
             Prefetch(
                 "answers",
                 queryset=answers,
-            )
+            ),
         ),
         id=question_id,
     )

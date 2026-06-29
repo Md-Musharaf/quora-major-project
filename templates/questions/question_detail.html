@@ -23,6 +23,17 @@
         </div>
       </div>
 
+      <!-- Question Topics -->
+      {% with topics=question.topics.all %}
+        {% if topics %}
+          <div class="mb-4 flex flex-wrap gap-2">
+            {% for topic in topics %}
+              <a href="{% url 'topics:detail' topic.slug %}" class="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm font-medium text-red-700 transition hover:bg-red-100">{{ topic.name }}</a>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
       <!-- Question title -->
       <h1 class="mb-4 text-3xl font-bold text-gray-900">{{ question.title }}</h1>
 
@@ -56,7 +67,13 @@
                   
                   
                   
+                  
+                  
+                  
                   border-red-600 bg-red-50 text-red-600
+
+
+
 
 
 
@@ -66,7 +83,13 @@
                   
                   
                   
+                  
+                  
+                  
                   border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:text-red-600
+
+
+
 
 
 
@@ -169,7 +192,13 @@
                       
                       
                       
+                      
+                      
+                      
                       border-red-600 bg-red-50 text-red-600
+
+
+
 
 
 
@@ -179,7 +208,13 @@
                       
                       
                       
+                      
+                      
+                      
                       border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:text-red-600
+
+
+
 
 
 

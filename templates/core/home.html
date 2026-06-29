@@ -34,6 +34,17 @@
             </div>
           </div>
 
+          <!-- Question Topics -->
+          {% with topics=question.topics.all %}
+            {% if topics %}
+              <div class="mb-3 flex flex-wrap gap-2">
+                {% for topic in topics %}
+                  <a href="{% url 'topics:detail' topic.slug %}" class="rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-700 transition hover:bg-red-100">{{ topic.name }}</a>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endwith %}
+
           <!-- Question title -->
           <h2 class="mb-2 text-xl font-bold text-gray-900"><a href="{% url 'questions:detail' question.id %}" class="hover:text-red-700 hover:underline">{{ question.title }}</a></h2>
 
@@ -64,13 +75,25 @@
                   {% if question.user_has_voted %}
                     
                     
+                    
+                    
+                    
                     border-red-600 bg-red-50 text-red-600
+
+
+
 
 
                   {% else %}
                     
                     
+                    
+                    
+                    
                     border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:text-red-600
+
+
+
 
 
                   {% endif %}">

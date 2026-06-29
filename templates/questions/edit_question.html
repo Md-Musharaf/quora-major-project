@@ -53,6 +53,13 @@
           {% endfor %}
         </div>
 
+        {% comment %} Topics {% endcomment %}
+        <div>
+          <label class="mb-2 block text-sm font-semibold text-gray-700">Select topics</label>
+
+          <div class="space-y-2 rounded-lg border border-gray-300 p-4">{{ form.topics }}</div>
+        </div>
+
         <div class="flex items-center gap-3">
           <button type="submit" class="rounded-md bg-red-700 px-5 py-2 text-white hover:bg-red-800">Save Changes</button>
 

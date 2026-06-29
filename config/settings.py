@@ -28,7 +28,8 @@ INSTALLED_APPS = [
     "users.apps.UsersConfig",
     "questions",
     "interactions",
-    "comments.apps.CommentsConfig",
+    "comments",
+    "topics",
 ]
 
 MIDDLEWARE = [

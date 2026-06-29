@@ -1,9 +1,16 @@
 from django import forms
 
 from .models import Answer, Question
+from topics.models import Topic
 
 
 class QuestionForm(forms.ModelForm):
+    topics = forms.ModelMultipleChoiceField(
+        queryset=Topic.objects.all(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+    )
+
     class Meta:
         model = Question
 
@@ -11,6 +18,7 @@ class QuestionForm(forms.ModelForm):
             "title",
             "description",
             "image",
+            "topics"
         ]
 
         widgets = {
@@ -28,6 +36,11 @@ class QuestionForm(forms.ModelForm):
             "image": forms.ClearableFileInput(
                 attrs={
                     "accept": "image/*",
+                }
+            ),
+            "topics": forms.TextInput(
+                attrs={
+                    "placeholder": "Related topics",
                 }
             ),
         }

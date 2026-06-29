@@ -20,6 +20,12 @@ class Question(models.Model):
         null=True,
     )
 
+    topics = models.ManyToManyField(
+        "topics.Topic",
+        related_name="questions",
+        blank=True,
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

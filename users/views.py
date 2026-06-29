@@ -119,6 +119,7 @@ def public_profile_view(request, user_id):
                 distinct=True,
             ),
         )
+        .prefetch_related("topics")
         .order_by("-created_at")
     )
 

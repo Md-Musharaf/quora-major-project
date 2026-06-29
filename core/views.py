@@ -21,6 +21,7 @@ def home(request):
             answer_count=Count("answers", distinct=True),
             vote_count=Count("votes", distinct=True),
         )
+        .prefetch_related("topics")
         .order_by("-created_at")
     )
 

@@ -29,6 +29,15 @@ def home(request):
         .order_by("-created_at")
     )
 
+    search_query = request.GET.get("q", "").strip()
+
+    if search_query:
+        questions = questions.filter(
+            Q(title__icontains=search_query)
+            | Q(description__icontains=search_query)
+            | Q(topics__name__icontains=search_query)
+        ).distinct()
+
     if request.user.is_authenticated:
         questions = questions.annotate(
             user_has_voted=Exists(
@@ -48,6 +57,7 @@ def home(request):
 
     context = {
         "questions": questions,
+        "search_query": search_query,
     }
 
     return render(request, "core/home.html", context)

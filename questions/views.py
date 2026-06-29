@@ -17,7 +17,7 @@ from .models import Answer, Question
 
 from comments.models import Comment
 
-from topics.models import Topic
+from .services import save_question_topics
 
 
 @login_required
@@ -25,33 +25,21 @@ def create_question(request):
     if request.method == "POST":
         form = QuestionForm(request.POST, request.FILES)
 
-        if form.is_valid():
-            question = form.save(commit=False)
-            question.author = request.user
-            question.save()
+    if form.is_valid():
+        question = form.save(commit=False)
+        question.author = request.user
+        question.save()
 
-            # Topics selected from the existing topic list.
-            selected_topics = list(form.cleaned_data["existing_topics"])
+        save_question_topics(
+            question=question,
+            selected_topics=form.cleaned_data["existing_topics"],
+            new_topic_names=form.cleaned_data["new_topic_names"],
+        )
 
-            # Topics entered manually by the user.
-            new_topic_names = form.cleaned_data["new_topic_names"]
-
-            topics_to_attach = selected_topics.copy()
-
-            for topic_name in new_topic_names:
-                topic = Topic.objects.filter(name__iexact=topic_name).first()
-
-                if topic is None:
-                    topic = Topic.objects.create(name=topic_name)
-
-                topics_to_attach.append(topic)
-
-            question.topics.set(topics_to_attach)
-
-            return redirect(
-                "questions:detail",
-                question_id=question.id,
-            )
+        return redirect(
+            "questions:detail",
+            question_id=question.id,
+        )
     else:
         form = QuestionForm()
 
@@ -187,33 +175,19 @@ def edit_question(request, question_id):
             instance=question,
         )
 
-        if form.is_valid():
-            question = form.save()
+    if form.is_valid():
+        question = form.save()
 
-            selected_topics = list(
-                form.cleaned_data["existing_topics"]
-            )
+        save_question_topics(
+            question=question,
+            selected_topics=form.cleaned_data["existing_topics"],
+            new_topic_names=form.cleaned_data["new_topic_names"],
+        )
 
-            new_topic_names = form.cleaned_data["new_topic_names"]
-
-            topics_to_attach = selected_topics.copy()
-
-            for topic_name in new_topic_names:
-                topic = Topic.objects.filter(
-                    name__iexact=topic_name
-                ).first()
-
-                if topic is None:
-                    topic = Topic.objects.create(name=topic_name)
-
-                topics_to_attach.append(topic)
-
-            question.topics.set(topics_to_attach)
-
-            return redirect(
-                "questions:detail",
-                question_id=question.id,
-            )
+        return redirect(
+            "questions:detail",
+            question_id=question.id,
+        )
     else:
         form = QuestionForm(instance=question)
 

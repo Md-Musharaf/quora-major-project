@@ -15,17 +15,15 @@
   </head>
   <body>
     <nav class="bg-black text-white p-4 text-2xl">Quora Navbar</nav>
-    <form method="GET" action="{% url 'search' %}" class="hidden flex-1 md:block">
-      <div class="relative max-w-md">
-        <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search questions, users and topics" class="w-full rounded-full border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-900 outline-none transition focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-100" />
+    <form method="GET" action="{% url 'core:search' %}" class="flex w-full items-center">
+      <input type="search" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search questions, users, or topics" class="w-full rounded-l-full border border-gray-300 px-4 py-2 outline-none focus:border-red-500" />
 
-        <button type="submit" class="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-red-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-red-700">Search</button>
-      </div>
+      <button type="submit" class="rounded-r-full bg-red-600 px-5 py-2 text-white hover:bg-red-700">Search</button>
     </form>
     {% if user.is_authenticated %}
       <span>Welcome, {{ user.profile.display_name }}</span>
 
-      <a href="{% url 'home' %}">Home</a>
+      <a href="{% url 'core:home' %}">Home</a>
 
       <a href="{% url 'users:logout' %}">Logout</a>
 

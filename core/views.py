@@ -3,12 +3,16 @@ from django.db.models import (
     Count,
     Exists,
     OuterRef,
+    Q,
     Value,
 )
 from django.shortcuts import render
 
 from interactions.models import QuestionVote
 from questions.models import Question
+
+from topics.models import Topic
+from users.models import User
 
 
 def home(request):
@@ -47,3 +51,51 @@ def home(request):
     }
 
     return render(request, "core/home.html", context)
+
+
+def search(request):
+    query = request.GET.get("q", "").strip()
+
+    questions = Question.objects.none()
+    users = User.objects.none()
+    topics = Topic.objects.none()
+
+    if query:
+        questions = (
+            Question.objects.filter(
+                Q(title__icontains=query) | Q(description__icontains=query)
+            )
+            .select_related(
+                "author",
+                "author__profile",
+            )
+            .prefetch_related("topics")
+            .order_by("-created_at")
+        )
+
+        users = (
+            User.objects.filter(
+                Q(profile__display_name__icontains=query)
+                | Q(profile__profession__icontains=query)
+                | Q(email__icontains=query)
+            )
+            .select_related("profile")
+            .order_by("profile__display_name")
+        )
+
+        topics = Topic.objects.filter(
+            Q(name__icontains=query) | Q(description__icontains=query)
+        ).order_by("name")
+
+    context = {
+        "query": query,
+        "questions": questions,
+        "users": users,
+        "topics": topics,
+    }
+
+    return render(
+        request,
+        "core/search_results.html",
+        context,
+    )

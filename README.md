@@ -350,7 +350,7 @@ gunicorn config.wsgi:application
 Example build command:
 
 ```bash
-pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+bash build.sh
 ```
 
 ---
@@ -471,9 +471,3 @@ Possible future additions include:
 
 - GitHub: [md-musharaf](https://quora-major-project.onrender.com/)
 - Email: `mdraza1615@gmail.com`
-
----
-
-## License
-
-Add the license you want to use for this project. For an open-source educational project, the MIT License is a common option.

@@ -3,13 +3,13 @@
 ## Persona 1: College Student Seeking Knowledge
 
 ### Name
-Pankaj
+Md. Musharaf
 
 ### Age
-21
+24
 
 ### Occupation
-B.Tech Student
+Software Engineer
 
 ### Goals
 - Ask questions related to academics and technology.
@@ -32,13 +32,13 @@ B.Tech Student
 ## Persona 2: Software Engineer Sharing Expertise
 
 ### Name
-Md. Musharaf
+Deepak Puthraya
 
 ### Age
-24
+32
 
 ### Occupation
-Software Engineer
+Sr. Software Engineer
 
 ### Goals
 - Share technical knowledge.

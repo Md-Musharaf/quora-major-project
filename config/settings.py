@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "interactions",
     "comments",
     "topics",
+    "search_engine.apps.SearchEngineConfig",
 ]
 
 MIDDLEWARE = [
@@ -140,3 +141,29 @@ AUTH_USER_MODEL = "users.User"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+ELASTICSEARCH_URL = config(
+    "ELASTICSEARCH_URL",
+    "http://localhost:9200",
+)
+
+ELASTICSEARCH_ENABLED = config("ELASTICSEARCH_ENABLED", "True").lower() in {
+    "true",
+    "1",
+    "yes",
+}
+
+ELASTICSEARCH_QUESTION_INDEX = config(
+    "ELASTICSEARCH_QUESTION_INDEX",
+    "quora_questions",
+)
+
+ELASTICSEARCH_USER_INDEX = config(
+    "ELASTICSEARCH_USER_INDEX",
+    "quora_users",
+)
+
+ELASTICSEARCH_TOPIC_INDEX = config(
+    "ELASTICSEARCH_TOPIC_INDEX",
+    "quora_topics",
+)

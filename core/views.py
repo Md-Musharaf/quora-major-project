@@ -14,6 +14,12 @@ from questions.models import Question
 from topics.models import Topic
 from users.models import User
 
+from search_engine.search import (
+    get_question_search_queryset,
+    get_topic_search_queryset,
+    get_user_search_queryset,
+)
+
 
 def home(request):
     questions = (
@@ -71,31 +77,20 @@ def search(request):
     topics = Topic.objects.none()
 
     if query:
-        questions = (
-            Question.objects.filter(
-                Q(title__icontains=query) | Q(description__icontains=query)
-            )
-            .select_related(
-                "author",
-                "author__profile",
-            )
-            .prefetch_related("topics")
-            .order_by("-created_at")
+        questions = get_question_search_queryset(
+            query,
+            limit=50,
         )
 
-        users = (
-            User.objects.filter(
-                Q(profile__display_name__icontains=query)
-                | Q(profile__profession__icontains=query)
-                | Q(email__icontains=query)
-            )
-            .select_related("profile")
-            .order_by("profile__display_name")
+        users = get_user_search_queryset(
+            query,
+            limit=50,
         )
 
-        topics = Topic.objects.filter(
-            Q(name__icontains=query) | Q(description__icontains=query)
-        ).order_by("name")
+        topics = get_topic_search_queryset(
+            query,
+            limit=50,
+        )
 
     context = {
         "query": query,

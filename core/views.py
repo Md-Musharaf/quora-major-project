@@ -14,6 +14,10 @@ from questions.models import Question
 from topics.models import Topic
 from users.models import User
 
+from questions.documents import QuestionDocument
+from topics.documents import TopicDocument
+from users.documents import UserDocument
+
 
 def home(request):
     questions = (
@@ -71,31 +75,71 @@ def search(request):
     topics = Topic.objects.none()
 
     if query:
+        question_search = QuestionDocument.search().query(
+            "multi_match",
+            query=query,
+            fields=[
+                "title^4",
+                "description^2",
+                "topics.name^3",
+                "author.display_name^2",
+                "author.profession",
+            ],
+            fuzziness="AUTO",
+        )[:50]
+
         questions = (
-            Question.objects.filter(
-                Q(title__icontains=query) | Q(description__icontains=query)
-            )
+            question_search.to_queryset()
             .select_related(
                 "author",
                 "author__profile",
             )
             .prefetch_related("topics")
-            .order_by("-created_at")
         )
 
-        users = (
-            User.objects.filter(
-                Q(profile__display_name__icontains=query)
-                | Q(profile__profession__icontains=query)
-                | Q(email__icontains=query)
-            )
-            .select_related("profile")
-            .order_by("profile__display_name")
-        )
+        user_search = UserDocument.search().query(
+            {
+                "bool": {
+                    "should": [
+                        {
+                            "multi_match": {
+                                "query": query,
+                                "fields": [
+                                    "display_name^4",
+                                    "profession^3",
+                                    "bio^2",
+                                    "location",
+                                ],
+                                "fuzziness": "AUTO",
+                            }
+                        },
+                        {
+                            "wildcard": {
+                                "email": {
+                                    "value": f"*{query.lower()}*",
+                                    "case_insensitive": True,
+                                }
+                            }
+                        },
+                    ],
+                    "minimum_should_match": 1,
+                }
+            }
+        )[:30]
 
-        topics = Topic.objects.filter(
-            Q(name__icontains=query) | Q(description__icontains=query)
-        ).order_by("name")
+        users = user_search.to_queryset().select_related("profile")
+
+        topic_search = TopicDocument.search().query(
+            "multi_match",
+            query=query,
+            fields=[
+                "name^4",
+                "description^2",
+            ],
+            fuzziness="AUTO",
+        )[:30]
+
+        topics = topic_search.to_queryset()
 
     context = {
         "query": query,

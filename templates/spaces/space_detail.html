@@ -13,10 +13,10 @@
           {% if space.cover_image %}
             <img src="{{ space.cover_image.url }}" alt="{{ space.name }}" class="h-48 w-full object-cover sm:h-64" />
           {% else %}
-            <div class="h-48 w-full bg-gradient-to-r from-red-100 via-orange-100 to-yellow-100 dark:from-red-950 dark:via-gray-900 dark:to-gray-800 sm:h-64"></div>
+            <div class="h-48 w-full bg-linear-to-r from-red-100 via-orange-100 to-yellow-100 dark:from-red-950 dark:via-gray-900 dark:to-gray-800 sm:h-64"></div>
           {% endif %}
 
-          <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+          <div class="absolute inset-0 bg-linear-to-t from-black/30 to-transparent"></div>
         </div>
 
         <div class="px-4 pb-6 sm:px-7">
@@ -30,7 +30,7 @@
               {% endif %}
 
               <div class="min-w-0 pt-3">
-                <h1 class="break-words text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">{{ space.name }}</h1>
+                <h1 class="wrap-break-words text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">{{ space.name }}</h1>
 
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   Created by
@@ -155,7 +155,7 @@
                 </div>
 
                 {% if post.image %}
-                  <img src="{{ post.image.url }}" alt="{{ post.title|default:'Space post image' }}" class="max-h-[32rem] w-full border-t border-gray-200 object-cover dark:border-gray-700" />
+                  <img src="{{ post.image.url }}" alt="{{ post.title|default:'Space post image' }}" class="max-h-128 w-full border-t border-gray-200 object-cover dark:border-gray-700" />
                 {% endif %}
               </article>
             {% endfor %}

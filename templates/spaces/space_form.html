@@ -1,0 +1,119 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+  {{ page_title }}
+{% endblock %}
+
+{% block content %}
+  <div class="min-h-screen bg-gray-100 px-3 py-6 dark:bg-gray-950 sm:px-4 sm:py-8">
+    <div class="mx-auto max-w-2xl">
+      <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
+        <div class="border-b border-gray-200 px-5 py-5 dark:border-gray-700 sm:px-7">
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ page_title }}</h1>
+
+          <p class="mt-1 text-sm leading-6 text-gray-500 dark:text-gray-400">Build a community around topics, questions, and ideas you care about.</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-6 px-5 py-6 sm:px-7">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <!-- Name -->
+          <div>
+            <label for="{{ form.name.id_for_label }}" class="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">Space name</label>
+
+            {{ form.name }}
+
+            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Choose a clear and recognizable name for your community.</p>
+
+            {% for error in form.name.errors %}
+              <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label for="{{ form.description.id_for_label }}" class="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">Description</label>
+
+            {{ form.description }}
+
+            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Explain what people can expect to find in this Space.</p>
+
+            {% for error in form.description.errors %}
+              <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <!-- Icon -->
+          <div>
+            <label for="{{ form.icon.id_for_label }}" class="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">Space icon</label>
+
+            {% if space and space.icon %}
+              <div class="mb-3">
+                <p class="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">Current icon</p>
+
+                <img src="{{ space.icon.url }}" alt="{{ space.name }}" class="h-20 w-20 rounded-xl border border-gray-200 object-cover shadow-sm dark:border-gray-700" />
+              </div>
+            {% endif %}
+
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">{{ form.icon }}</div>
+
+            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">A square image works best.</p>
+
+            {% for error in form.icon.errors %}
+              <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <!-- Cover image -->
+          <div>
+            <label for="{{ form.cover_image.id_for_label }}" class="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">Cover image</label>
+
+            {% if space and space.cover_image %}
+              <div class="mb-3">
+                <p class="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400">Current cover image</p>
+
+                <img src="{{ space.cover_image.url }}" alt="{{ space.name }}" class="h-40 w-full rounded-xl border border-gray-200 object-cover shadow-sm dark:border-gray-700" />
+              </div>
+            {% endif %}
+
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800">{{ form.cover_image }}</div>
+
+            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Use a wide image that represents your Space.</p>
+
+            {% for error in form.cover_image.errors %}
+              <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <!-- Topics -->
+          <div>
+            <label for="{{ form.topics.id_for_label }}" class="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">Related topics</label>
+
+            {{ form.topics }}
+
+            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">Hold Ctrl on Windows or Linux, or Command on macOS, to select multiple topics.</p>
+
+            {% for error in form.topics.errors %}
+              <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <!-- Actions -->
+          <div class="flex flex-col-reverse gap-3 border-t border-gray-200 pt-5 dark:border-gray-700 sm:flex-row sm:items-center">
+            {% if space %}
+              <a href="{% url 'spaces:detail' space.slug %}" class="rounded-full border border-gray-300 px-6 py-2.5 text-center text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800">Cancel</a>
+            {% else %}
+              <a href="{% url 'spaces:list' %}" class="rounded-full border border-gray-300 px-6 py-2.5 text-center text-sm font-semibold text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800">Cancel</a>
+            {% endif %}
+
+            <button type="submit" class="rounded-full bg-red-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">{{ submit_text }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

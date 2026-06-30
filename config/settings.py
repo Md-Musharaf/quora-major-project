@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "interactions",
     "comments",
     "topics",
+    "spaces"
 ]
 
 MIDDLEWARE = [

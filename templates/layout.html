@@ -13,10 +13,10 @@
       {% endblock %}
     </title>
 
-    <!-- 
+    <!--  
       Apply the saved theme before the page renders.
       This prevents a light-theme flash when dark mode is active.
-     -->
+      -->
     <script>
       ;(() => {
         const savedTheme = localStorage.getItem('theme')
@@ -50,15 +50,19 @@
                  border-b-2 px-2 transition
                  {% if request.resolver_match.url_name == 'home' %}
             
+            
                    border-red-700 text-red-700
                    dark:border-red-500 dark:text-red-500
 
+
           {% else %}
+            
             
                    border-transparent text-gray-500
                    hover:bg-gray-100 hover:text-red-700
                    dark:text-gray-400 dark:hover:bg-gray-800
                    dark:hover:text-red-400
+
 
           {% endif %}"
           aria-label="Home"
@@ -67,6 +71,35 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 11.5 12 4l9 7.5" />
 
             <path stroke-linecap="round" stroke-linejoin="round" d="M5.5 10.5V20h13v-9.5" />
+          </svg>
+        </a>
+
+        <!-- Spaces navigation -->
+        <a href="{% url 'spaces:list' %}"
+          class="group flex h-12 items-center justify-center
+                 border-b-2 px-2 transition
+                 {% if request.resolver_match.namespace == 'spaces' %}
+            
+
+                   border-red-700 text-red-700
+                   dark:border-red-500 dark:text-red-500
+
+
+          {% else %}
+            
+
+                   border-transparent text-gray-500
+                   hover:bg-gray-100 hover:text-red-700
+                   dark:text-gray-400 dark:hover:bg-gray-800
+                   dark:hover:text-red-400
+
+
+          {% endif %}"
+          aria-label="Spaces"
+          title="Spaces">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-6 w-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 3.75h10A2.25 2.25 0 0 1 19.25 6v12A2.25 2.25 0 0 1 17 20.25H7A2.25 2.25 0 0 1 4.75 18V6A2.25 2.25 0 0 1 7 3.75Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 8h8M8 12h8M8 16h5" />
           </svg>
         </a>
 
@@ -171,27 +204,35 @@
           <div class="rounded-lg border px-4 py-3 text-sm
                    {% if message.tags == 'success' %}
               
+              
                      border-green-200 bg-green-50 text-green-800
                      dark:border-green-900 dark:bg-green-950
                      dark:text-green-200
 
+
             {% elif message.tags == 'error' %}
+              
               
                      border-red-200 bg-red-50 text-red-800
                      dark:border-red-900 dark:bg-red-950
                      dark:text-red-200
 
+
             {% elif message.tags == 'warning' %}
+              
               
                      border-yellow-200 bg-yellow-50 text-yellow-800
                      dark:border-yellow-900 dark:bg-yellow-950
                      dark:text-yellow-200
 
+
             {% else %}
+              
               
                      border-blue-200 bg-blue-50 text-blue-800
                      dark:border-blue-900 dark:bg-blue-950
                      dark:text-blue-200
+
 
             {% endif %}">{{ message }}</div>
         {% endfor %}

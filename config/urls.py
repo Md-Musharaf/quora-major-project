@@ -11,6 +11,7 @@ urlpatterns = [
     path("interactions/", include("interactions.urls")),
     path("comments/", include("comments.urls")),
     path("topics/", include("topics.urls")),
+    path("spaces/", include("spaces.urls")),
 ]
 
 if settings.DEBUG:

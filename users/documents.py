@@ -1,13 +1,10 @@
-from django_elasticsearch_dsl import fields
+from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-
-from core.elasticsearch import CompatibleDocument
 
 from .models import Profile, User
 
-
 @registry.register_document
-class UserDocument(CompatibleDocument):
+class UserDocument(Document):
     email = fields.KeywordField()
 
     display_name = fields.TextField(

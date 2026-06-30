@@ -144,13 +144,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 ELASTICSEARCH_DSL = {
     "default": {
-        "hosts": "http://localhost:9200",
-    },
-}
-
-ELASTICSEARCH_DSL = {
-    "default": {
-        "hosts": "http://localhost:9200",
+        "hosts": "http://localhost:9201",
     },
 }
 

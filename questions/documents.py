@@ -1,7 +1,5 @@
-from django_elasticsearch_dsl import fields
+from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-
-from core.elasticsearch import CompatibleDocument
 
 from topics.models import Topic
 from users.models import Profile, User
@@ -10,7 +8,7 @@ from .models import Question
 
 
 @registry.register_document
-class QuestionDocument(CompatibleDocument):
+class QuestionDocument(Document):
     title = fields.TextField(
         fields={
             "raw": fields.KeywordField(),

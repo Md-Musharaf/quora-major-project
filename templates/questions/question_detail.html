@@ -1,299 +1,410 @@
 {% extends 'layout.html' %}
 
 {% block title %}
-  {{ question.title }}
+  {{ question.title }} | Quora
 {% endblock %}
 
 {% block content %}
-  <div class="mx-auto max-w-3xl px-4 py-8">
-    <!-- Question -->
-    <article class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-      <!-- Question author -->
-      <div class="mb-5 flex items-center gap-3">
-        {% if question.author.profile.profile_picture %}
-          <img src="{{ question.author.profile.profile_picture.url }}" alt="{{ question.author.profile.display_name }}" class="h-12 w-12 rounded-full object-cover" />
-        {% else %}
-          <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-300 text-lg font-bold text-gray-700">{{ question.author.profile.display_name|first|upper }}</div>
-        {% endif %}
+  <div class="mx-auto grid max-w-5xl grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,700px)_280px]">
+    <!-- Main content -->
+    <div class="min-w-0 space-y-4">
+      <!-- Question card -->
+      <article class="overflow-hidden rounded-md border border-gray-300 bg-white shadow-sm">
+        <!-- Question information -->
+        <div class="p-5 sm:p-6">
+          <!-- Question author -->
+          <div class="flex items-start gap-3">
+            <a href="{% url 'users:public_profile' question.author.id %}" class="shrink-0">
+              {% if question.author.profile.profile_picture %}
+                <img src="{{ question.author.profile.profile_picture.url }}" alt="{{ question.author.profile.display_name }}" class="h-10 w-10 rounded-full border border-gray-200 object-cover" />
+              {% else %}
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 font-semibold text-gray-700">{{ question.author.profile.display_name|first|upper }}</div>
+              {% endif %}
+            </a>
 
-        <div>
-          <a href="{% url 'users:public_profile' question.author.id %}" class="font-semibold text-gray-900 hover:underline">{{ question.author.profile.display_name }}</a>
+            <div class="min-w-0">
+              <a href="{% url 'users:public_profile' question.author.id %}" class="block truncate text-sm font-semibold text-gray-900 hover:underline">{{ question.author.profile.display_name }}</a>
 
-          <p class="text-sm text-gray-500">Asked {{ question.created_at|timesince }} ago</p>
+              <p class="mt-0.5 text-xs leading-5 text-gray-500">
+                {% if question.author.profile.profession %}
+                  {{ question.author.profile.profession }} ·
+                {% endif %}Asked {{ question.created_at|timesince }} ago
+              </p>
+            </div>
+          </div>
+
+          <!-- Question topics / tags -->
+          {% with topics=question.topics.all %}
+            <div class="mt-4 flex flex-wrap items-center gap-2">
+              <span class="text-xs font-semibold uppercase tracking-wide text-gray-400">Topics</span>
+
+              {% for topic in topics %}
+                <a href="{% url 'topics:detail' topic.slug %}" class="rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-700 transition hover:bg-red-100">{{ topic.name }}</a>
+              {% empty %}
+                <span class="rounded-full border border-dashed border-gray-300 px-3 py-1 text-xs text-gray-500">No topics added</span>
+              {% endfor %}
+
+              {% if user == question.author %}
+                <a href="{% url 'questions:edit' question.id %}" class="inline-flex items-center gap-1 rounded-full border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700">
+                  <span aria-hidden="true">+</span>
+
+                  {% if topics %}
+                    Edit topics
+                  {% else %}
+                    Add topics
+                  {% endif %}
+                </a>
+              {% endif %}
+            </div>
+          {% endwith %}
+
+          <!-- Question title -->
+          <h1 class="mt-4 text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">{{ question.title }}</h1>
+
+          <!-- Question description -->
+          {% if question.description %}
+            <div class="mt-3 whitespace-pre-line text-[15px] leading-7 text-gray-700">{{ question.description }}</div>
+          {% else %}
+            <p class="mt-3 text-sm italic text-gray-500">No additional details were provided.</p>
+          {% endif %}
         </div>
-      </div>
 
-      <!-- Question Topics -->
-      {% with topics=question.topics.all %}
-        {% if topics %}
-          <div class="mb-4 flex flex-wrap gap-2">
-            {% for topic in topics %}
-              <a href="{% url 'topics:detail' topic.slug %}" class="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-sm font-medium text-red-700 transition hover:bg-red-100">{{ topic.name }}</a>
-            {% endfor %}
+        <!-- Question image -->
+        {% if question.image %}
+          <div class="border-y border-gray-200 bg-gray-50">
+            <img src="{{ question.image.url }}" alt="Image attached to {{ question.title }}" class="max-h-[560px] w-full object-contain" />
           </div>
         {% endif %}
-      {% endwith %}
 
-      <!-- Question title -->
-      <h1 class="mb-4 text-3xl font-bold text-gray-900">{{ question.title }}</h1>
-
-      <!-- Question description -->
-      {% if question.description %}
-        <div class="whitespace-pre-line text-gray-700">{{ question.description }}</div>
-      {% else %}
-        <p class="italic text-gray-500">No additional details were provided.</p>
-      {% endif %}
-
-      <!-- Question image -->
-      {% if question.image %}
-        <div class="mt-5 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-          <img src="{{ question.image.url }}" alt="Image attached to {{ question.title }}" class="max-h-[600px] w-full object-contain" />
-        </div>
-      {% endif %}
-
-      <!-- Question voting -->
-      {% with vote_count=question.votes.count %}
-        <div class="mt-6 flex flex-wrap items-center gap-3 border-t border-gray-200 pt-4">
-          {% if user.is_authenticated %}
-            <form method="POST" action="{% url 'interactions:toggle_question_vote' question.id %}">
-              {% csrf_token %}
-
-              <input type="hidden" name="next" value="{{ request.get_full_path }}" />
-
-              <button type="submit"
-                class="flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition
-                {% if user_has_voted %}
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  border-red-600 bg-red-50 text-red-600
-
-
-
-
-
-
-
-                {% else %}
-                  
-                  
-                  
-                  
-                  
-                  
-                  
-                  border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:text-red-600
-
-
-
-
-
-
-
-                {% endif %}">
-                <span aria-hidden="true">▲</span>
-
-                {% if user_has_voted %}
-                  Upvoted
-                {% else %}
-                  Upvote
-                {% endif %}
-              </button>
-            </form>
-          {% else %}
-            <a href="{% url 'users:login' %}?next={{ request.path }}" class="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-red-500 hover:text-red-600">Log in to upvote</a>
-          {% endif %}
-
-          <span class="text-sm text-gray-500">{{ vote_count }} upvote{{ vote_count|pluralize }}</span>
-        </div>
-      {% endwith %}
-
-      <!-- Question author controls -->
-      {% if user == question.author %}
-        <div class="mt-6 flex items-center gap-3 border-t border-gray-200 pt-4">
-          <a href="{% url 'questions:edit' question.id %}" class="rounded-md bg-gray-700 px-4 py-2 text-white transition hover:bg-gray-800">Edit</a>
-
-          <a href="{% url 'questions:delete' question.id %}" class="rounded-md bg-red-700 px-4 py-2 text-white transition hover:bg-red-800">Delete</a>
-        </div>
-      {% endif %}
-    </article>
-
-    <!-- Answer form -->
-    <section class="mt-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 class="mb-5 text-2xl font-bold text-gray-900">Write an Answer</h2>
-
-      {% if user.is_authenticated %}
-        <form method="POST">
-          {% csrf_token %}
-
-          {{ answer_form.content }}
-
-          {% for error in answer_form.content.errors %}
-            <p class="mt-2 text-sm text-red-600">{{ error }}</p>
-          {% endfor %}
-
-          <button type="submit" class="mt-4 rounded-md bg-red-700 px-5 py-2 text-white transition hover:bg-red-800">Post Answer</button>
-        </form>
-      {% else %}
-        <p class="text-gray-600">
-          You need to
-
-          <a href="{% url 'users:login' %}?next={{ request.path }}" class="font-semibold text-red-700 hover:underline">log in</a>
-
-          to answer this question.
-        </p>
-      {% endif %}
-    </section>
-
-    <!-- Existing answers -->
-    <section class="mt-8">
-      <h2 class="mb-5 text-2xl font-bold text-gray-900">
-        {{ question.answers.count }}
-        answer{{ question.answers.count|pluralize }}
-      </h2>
-
-      <div class="space-y-5">
-        {% for answer in question.answers.all %}
-          <article id="answer-{{ answer.id }}" class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <!-- Answer author -->
-            <div class="mb-4 flex items-center gap-3">
-              {% if answer.author.profile.profile_picture %}
-                <img src="{{ answer.author.profile.profile_picture.url }}" alt="{{ answer.author.profile.display_name }}" class="h-10 w-10 rounded-full object-cover" />
-              {% else %}
-                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 font-bold text-gray-700">{{ answer.author.profile.display_name|first|upper }}</div>
-              {% endif %}
-
-              <div>
-                <a href="{% url 'users:public_profile' answer.author.id %}" class="font-semibold text-gray-900 hover:underline">{{ answer.author.profile.display_name }}</a>
-
-                <p class="text-sm text-gray-500">Answered {{ answer.created_at|timesince }} ago</p>
-              </div>
-            </div>
-
-            <!-- Answer content -->
-            <div class="whitespace-pre-line text-gray-700">{{ answer.content }}</div>
-
-            <!-- Answer voting -->
-            <div class="mt-5 flex flex-wrap items-center gap-3 border-t border-gray-200 pt-4">
+        <!-- Question action bar -->
+        {% with vote_count=question.votes.count %}
+          <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-3 sm:px-6">
+            <div class="flex flex-wrap items-center gap-2">
+              <!-- Question upvote -->
               {% if user.is_authenticated %}
-                <form method="POST" action="{% url 'interactions:toggle_answer_vote' answer.id %}">
+                <form method="POST" action="{% url 'interactions:toggle_question_vote' question.id %}">
                   {% csrf_token %}
 
-                  <input type="hidden" name="next" value="{{ request.get_full_path }}#answer-{{ answer.id }}" />
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}" />
 
                   <button type="submit"
-                    class="flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition
-                    {% if answer.user_has_voted %}
+                    class="flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition
+                      {% if user_has_voted %}
                       
-                      
-                      
-                      
-                      
-                      
-                      
-                      border-red-600 bg-red-50 text-red-600
-
-
-
-
-
-
+                        border-red-200 bg-red-50 text-red-700 hover:bg-red-100
 
                     {% else %}
                       
-                      
-                      
-                      
-                      
-                      
-                      
-                      border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:text-red-600
-
-
-
-
-
-
+                        border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100
 
                     {% endif %}">
-                    <span aria-hidden="true">▲</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m12 4-7 8h4v8h6v-8h4l-7-8Z"></path>
+                    </svg>
 
-                    {% if answer.user_has_voted %}
+                    {% if user_has_voted %}
                       Upvoted
                     {% else %}
                       Upvote
                     {% endif %}
+
+                    <span class="border-l border-current pl-2 opacity-70">{{ vote_count }}</span>
                   </button>
                 </form>
               {% else %}
-                <a href="{% url 'users:login' %}?next={{ request.path }}" class="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-red-500 hover:text-red-600">Log in to upvote</a>
+                <a href="{% url 'users:login' %}?next={{ request.get_full_path|urlencode }}" class="flex items-center gap-2 rounded-full border border-gray-300 bg-gray-50 px-3.5 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m12 4-7 8h4v8h6v-8h4l-7-8Z"></path>
+                  </svg>Upvote · {{ vote_count }}
+                </a>
               {% endif %}
 
-              <span class="text-sm text-gray-500">
-                {{ answer.vote_count }}
-                upvote{{ answer.vote_count|pluralize }}
-              </span>
+              <!-- Answer count -->
+              <a href="#answers" class="flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 5h14v11H9l-4 4V5Z"></path>
+                </svg>
+
+                {{ question.answers.count }}
+                answer{{ question.answers.count|pluralize }}
+              </a>
             </div>
 
-            <!-- Comments section -->
-            <div class="mt-5 border-t border-gray-200 pt-4">
-              <h4 class="mb-3 text-sm font-semibold text-gray-800">Comments</h4>
+            <!-- Question owner controls -->
+            {% if user == question.author %}
+              <div class="flex items-center gap-1">
+                <a href="{% url 'questions:edit' question.id %}" class="rounded-full px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900">Edit</a>
 
-              <!-- Top-level comment form -->
-              {% if user.is_authenticated %}
-                <form method="POST" action="{% url 'comments:create_comment' answer.id %}" class="mb-5">
-                  {% csrf_token %}
-
-                  <textarea name="content" rows="2" maxlength="1000" required placeholder="Add a comment..." class="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
-
-                  <input type="hidden" name="next" value="{{ request.get_full_path }}#answer-{{ answer.id }}" />
-
-                  <div class="mt-2 flex justify-end">
-                    <button type="submit" class="rounded-full bg-blue-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-blue-700">Comment</button>
-                  </div>
-                </form>
-              {% else %}
-                <p class="mb-4 text-sm text-gray-500">
-                  <a href="{% url 'users:login' %}?next={{ request.get_full_path|urlencode }}" class="font-medium text-blue-600 hover:underline">Log in</a>
-
-                  to comment.
-                </p>
-              {% endif %}
-
-              <!-- Nested comments -->
-              <div class="space-y-4">
-                {% for comment in answer.root_comments %}
-                  {% include 'comments/comment_item.html' with comment=comment answer=answer %}
-                {% empty %}
-                  <p class="text-sm text-gray-500">No comments yet.</p>
-                {% endfor %}
-              </div>
-            </div>
-
-            <!-- Answer author controls -->
-            {% if user == answer.author %}
-              <div class="mt-5 flex items-center gap-3 border-t border-gray-200 pt-4">
-                <a href="{% url 'questions:edit_answer' answer.id %}" class="rounded-md bg-gray-700 px-4 py-2 text-sm text-white transition hover:bg-gray-800">Edit</a>
-
-                <a href="{% url 'questions:delete_answer' answer.id %}" class="rounded-md bg-red-700 px-4 py-2 text-sm text-white transition hover:bg-red-800">Delete</a>
+                <a href="{% url 'questions:delete' question.id %}" class="rounded-full px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 hover:text-red-700">Delete</a>
               </div>
             {% endif %}
-          </article>
-        {% empty %}
-          <div class="rounded-lg border border-gray-200 bg-white p-6 text-center shadow-sm">
-            <p class="text-gray-500">No answers yet. Be the first to answer.</p>
           </div>
-        {% endfor %}
-      </div>
-    </section>
+        {% endwith %}
+      </article>
 
-    <!-- Back link -->
-    <div class="mt-5">
-      <a href="{% url 'home' %}" class="text-red-700 hover:underline">← Back to questions</a>
+      <!-- Answer form -->
+      <section class="rounded-md border border-gray-300 bg-white shadow-sm">
+        <div class="border-b border-gray-200 px-5 py-4 sm:px-6">
+          <h2 class="text-lg font-semibold text-gray-900">Write an answer</h2>
+
+          <p class="mt-1 text-sm text-gray-500">Share what you know and help the community.</p>
+        </div>
+
+        <div class="p-5 sm:p-6">
+          {% if user.is_authenticated %}
+            <!-- Current user -->
+            <div class="mb-4 flex items-center gap-3">
+              <a href="{% url 'users:public_profile' user.id %}">
+                {% if user.profile.profile_picture %}
+                  <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.profile.display_name }}" class="h-9 w-9 rounded-full border border-gray-200 object-cover" />
+                {% else %}
+                  <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gray-300 text-sm font-semibold text-gray-700">{{ user.profile.display_name|first|upper }}</div>
+                {% endif %}
+              </a>
+
+              <div>
+                <a href="{% url 'users:public_profile' user.id %}" class="text-sm font-semibold text-gray-900 hover:underline">{{ user.profile.display_name }}</a>
+
+                <p class="text-xs text-gray-500">Add your answer below</p>
+              </div>
+            </div>
+
+            <form method="POST">
+              {% csrf_token %}
+
+              <div class="[&>textarea]:min-h-40 [&>textarea]:w-full [&>textarea]:resize-y [&>textarea]:rounded-md [&>textarea]:border [&>textarea]:border-gray-300 [&>textarea]:px-4 [&>textarea]:py-3 [&>textarea]:text-sm [&>textarea]:leading-6 [&>textarea]:text-gray-800 [&>textarea]:outline-none [&>textarea]:transition [&>textarea]:focus:border-blue-500 [&>textarea]:focus:ring-1 [&>textarea]:focus:ring-blue-500">{{ answer_form.content }}</div>
+
+              {% for error in answer_form.content.errors %}
+                <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+              {% endfor %}
+
+              <div class="mt-4 flex justify-end">
+                <button type="submit" class="rounded-full bg-red-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-800">Post answer</button>
+              </div>
+            </form>
+          {% else %}
+            <div class="rounded-md border border-gray-200 bg-gray-50 px-4 py-4 text-sm text-gray-600">
+              You need to
+              <a href="{% url 'users:login' %}?next={{ request.get_full_path|urlencode }}" class="font-semibold text-red-700 hover:underline">log in</a>
+              to answer this question.
+            </div>
+          {% endif %}
+        </div>
+      </section>
+
+      <!-- Existing answers -->
+      <section id="answers">
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <h2 class="text-lg font-semibold text-gray-900">
+            {{ question.answers.count }}
+            answer{{ question.answers.count|pluralize }}
+          </h2>
+
+          <span class="text-xs text-gray-500">Community answers</span>
+        </div>
+
+        <div class="space-y-4">
+          {% for answer in question.answers.all %}
+            <article id="answer-{{ answer.id }}" class="overflow-hidden rounded-md border border-gray-300 bg-white shadow-sm">
+              <!-- Answer body -->
+              <div class="p-5 sm:p-6">
+                <!-- Answer author -->
+                <div class="flex items-start justify-between gap-3">
+                  <div class="flex min-w-0 items-center gap-3">
+                    <a href="{% url 'users:public_profile' answer.author.id %}" class="shrink-0">
+                      {% if answer.author.profile.profile_picture %}
+                        <img src="{{ answer.author.profile.profile_picture.url }}" alt="{{ answer.author.profile.display_name }}" class="h-10 w-10 rounded-full border border-gray-200 object-cover" />
+                      {% else %}
+                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 font-semibold text-gray-700">{{ answer.author.profile.display_name|first|upper }}</div>
+                      {% endif %}
+                    </a>
+
+                    <div class="min-w-0">
+                      <a href="{% url 'users:public_profile' answer.author.id %}" class="block truncate text-sm font-semibold text-gray-900 hover:underline">{{ answer.author.profile.display_name }}</a>
+
+                      <p class="mt-0.5 text-xs leading-5 text-gray-500">
+                        {% if answer.author.profile.profession %}
+                          {{ answer.author.profile.profession }} ·
+                        {% endif %}Answered {{ answer.created_at|timesince }} ago
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Answer owner controls -->
+                  {% if user == answer.author %}
+                    <div class="flex shrink-0 items-center gap-1">
+                      <a href="{% url 'questions:edit_answer' answer.id %}" class="rounded-full px-2.5 py-1.5 text-xs font-medium text-gray-600 transition hover:bg-gray-100">Edit</a>
+
+                      <a href="{% url 'questions:delete_answer' answer.id %}" class="rounded-full px-2.5 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50">Delete</a>
+                    </div>
+                  {% endif %}
+                </div>
+
+                <!-- Answer content -->
+                <div class="mt-5 whitespace-pre-line text-[15px] leading-7 text-gray-800">{{ answer.content }}</div>
+              </div>
+
+              <!-- Answer voting -->
+              <div class="border-t border-gray-200 px-5 py-3 sm:px-6">
+                {% if user.is_authenticated %}
+                  <form method="POST" action="{% url 'interactions:toggle_answer_vote' answer.id %}">
+                    {% csrf_token %}
+
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}#answer-{{ answer.id }}" />
+
+                    <button type="submit"
+                      class="flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition
+                        {% if answer.user_has_voted %}
+                        
+                          border-red-200 bg-red-50 text-red-700 hover:bg-red-100
+
+                      {% else %}
+                        
+                          border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100
+
+                      {% endif %}">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m12 4-7 8h4v8h6v-8h4l-7-8Z"></path>
+                      </svg>
+
+                      {% if answer.user_has_voted %}
+                        Upvoted
+                      {% else %}
+                        Upvote
+                      {% endif %}
+
+                      <span class="border-l border-current pl-2 opacity-70">{{ answer.vote_count }}</span>
+                    </button>
+                  </form>
+                {% else %}
+                  <a href="{% url 'users:login' %}?next={{ request.get_full_path|urlencode }}" class="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-gray-50 px-3.5 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100">Upvote · {{ answer.vote_count }}</a>
+                {% endif %}
+              </div>
+
+              <!-- Comments -->
+              <div class="border-t border-gray-200 bg-gray-50 px-5 py-4 sm:px-6">
+                <div class="mb-4 flex items-center justify-between">
+                  <h3 class="text-sm font-semibold text-gray-900">Comments</h3>
+                </div>
+
+                <!-- Comment form -->
+                {% if user.is_authenticated %}
+                  <form method="POST" action="{% url 'comments:create_comment' answer.id %}" class="mb-5">
+                    {% csrf_token %}
+
+                    <div class="flex items-start gap-3">
+                      <a href="{% url 'users:public_profile' user.id %}" class="shrink-0">
+                        {% if user.profile.profile_picture %}
+                          <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.profile.display_name }}" class="h-8 w-8 rounded-full border border-gray-200 object-cover" />
+                        {% else %}
+                          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-300 text-xs font-semibold text-gray-700">{{ user.profile.display_name|first|upper }}</div>
+                        {% endif %}
+                      </a>
+
+                      <div class="min-w-0 flex-1">
+                        <textarea name="content" rows="2" maxlength="1000" required placeholder="Add a comment..." class="w-full resize-none rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}#answer-{{ answer.id }}" />
+
+                        <div class="mt-2 flex justify-end">
+                          <button type="submit" class="rounded-full bg-blue-600 px-4 py-1.5 text-sm font-medium text-white transition hover:bg-blue-700">Comment</button>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                {% else %}
+                  <p class="mb-4 text-sm text-gray-500">
+                    <a href="{% url 'users:login' %}?next={{ request.get_full_path|urlencode }}" class="font-medium text-blue-600 hover:underline">Log in</a>
+                    to comment.
+                  </p>
+                {% endif %}
+
+                <!-- Nested comments -->
+                <div class="space-y-4">
+                  {% for comment in answer.root_comments %}
+                    {% include 'comments/comment_item.html' with comment=comment answer=answer %}
+                  {% empty %}
+                    <p class="text-sm text-gray-500">No comments yet.</p>
+                  {% endfor %}
+                </div>
+              </div>
+            </article>
+          {% empty %}
+            <div class="rounded-md border border-gray-300 bg-white px-6 py-10 text-center shadow-sm">
+              <h3 class="text-base font-semibold text-gray-900">No answers yet</h3>
+
+              <p class="mt-2 text-sm text-gray-500">Be the first person to answer this question.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- Back link -->
+      <div class="pt-1">
+        <a href="{% url 'core:home' %}" class="inline-flex items-center gap-2 text-sm font-medium text-red-700 hover:underline">
+          <span aria-hidden="true">←</span>
+          Back to questions
+        </a>
+      </div>
     </div>
+
+    <!-- Right sidebar -->
+    <aside class="sticky top-20 hidden space-y-4 lg:block">
+      <!-- About author -->
+      <div class="rounded-md border border-gray-300 bg-white p-4">
+        <h2 class="text-sm font-semibold text-gray-900">About the author</h2>
+
+        <div class="mt-4 flex items-center gap-3">
+          <a href="{% url 'users:public_profile' question.author.id %}">
+            {% if question.author.profile.profile_picture %}
+              <img src="{{ question.author.profile.profile_picture.url }}" alt="{{ question.author.profile.display_name }}" class="h-11 w-11 rounded-full border border-gray-200 object-cover" />
+            {% else %}
+              <div class="flex h-11 w-11 items-center justify-center rounded-full bg-gray-300 font-semibold text-gray-700">{{ question.author.profile.display_name|first|upper }}</div>
+            {% endif %}
+          </a>
+
+          <div class="min-w-0">
+            <a href="{% url 'users:public_profile' question.author.id %}" class="block truncate text-sm font-semibold text-gray-900 hover:underline">{{ question.author.profile.display_name }}</a>
+
+            {% if question.author.profile.profession %}
+              <p class="truncate text-xs text-gray-500">{{ question.author.profile.profession }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if question.author.profile.bio %}
+          <p class="mt-4 text-sm leading-5 text-gray-600">{{ question.author.profile.bio|truncatewords:30 }}</p>
+        {% endif %}
+
+        <a href="{% url 'users:public_profile' question.author.id %}" class="mt-4 block rounded-full border border-gray-300 px-4 py-2 text-center text-sm font-medium text-gray-700 transition hover:bg-gray-50">View profile</a>
+      </div>
+
+      <!-- Question activity -->
+      <div class="overflow-hidden rounded-md border border-gray-300 bg-white">
+        <div class="border-b border-gray-200 px-4 py-3">
+          <h2 class="text-sm font-semibold text-gray-900">Question activity</h2>
+        </div>
+
+        <div class="divide-y divide-gray-100">
+          <div class="flex items-center justify-between px-4 py-3 text-sm">
+            <span class="text-gray-500">Upvotes</span>
+
+            <span class="font-semibold text-gray-900">{{ question.votes.count }}</span>
+          </div>
+
+          <div class="flex items-center justify-between px-4 py-3 text-sm">
+            <span class="text-gray-500">Answers</span>
+
+            <span class="font-semibold text-gray-900">{{ question.answers.count }}</span>
+          </div>
+
+          <div class="flex items-center justify-between px-4 py-3 text-sm">
+            <span class="text-gray-500">Topics</span>
+
+            <span class="font-semibold text-gray-900">{{ question.topics.count }}</span>
+          </div>
+        </div>
+      </div>
+    </aside>
   </div>
 {% endblock %}

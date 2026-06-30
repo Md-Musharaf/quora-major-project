@@ -8,3 +8,130 @@
   * the scope of this path.
   */
 @source "../../../**/*.{html,py,js}";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+/* -------------------------------------------------
+   Global dark-mode compatibility layer
+   ------------------------------------------------- */
+
+html.dark {
+  color-scheme: dark;
+}
+
+/* Main surfaces */
+.dark .bg-white:not([class*="dark:bg-"]) {
+  background-color: #202020;
+}
+
+.dark .bg-gray-50:not([class*="dark:bg-"]) {
+  background-color: #242424;
+}
+
+.dark .bg-gray-100:not([class*="dark:bg-"]) {
+  background-color: #181818;
+}
+
+.dark .bg-gray-200:not([class*="dark:bg-"]) {
+  background-color: #303030;
+}
+
+.dark .bg-gray-300:not([class*="dark:bg-"]) {
+  background-color: #404040;
+}
+
+/* Main text */
+.dark .text-gray-900:not([class*="dark:text-"]) {
+  color: #f9fafb;
+}
+
+.dark .text-gray-800:not([class*="dark:text-"]) {
+  color: #f3f4f6;
+}
+
+.dark .text-gray-700:not([class*="dark:text-"]) {
+  color: #e5e7eb;
+}
+
+.dark .text-gray-600:not([class*="dark:text-"]) {
+  color: #c4c7cc;
+}
+
+.dark .text-gray-500:not([class*="dark:text-"]) {
+  color: #9ca3af;
+}
+
+.dark .text-gray-400:not([class*="dark:text-"]) {
+  color: #7f858f;
+}
+
+/* Borders */
+.dark .border-gray-100:not([class*="dark:border-"]),
+.dark .border-gray-200:not([class*="dark:border-"]),
+.dark .border-gray-300:not([class*="dark:border-"]) {
+  border-color: #3f3f46;
+}
+
+/* Dividers */
+.dark .divide-gray-200> :not([hidden])~ :not([hidden]) {
+  border-color: #3f3f46;
+}
+
+/* Rings around avatars and images */
+.dark .ring-gray-200,
+.dark .ring-gray-300 {
+  --tw-ring-color: #4b5563;
+}
+
+/* Inputs, textareas and selects */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark textarea,
+.dark select {
+  border-color: #4b5563;
+  background-color: #262626;
+  color: #f9fafb;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #9ca3af;
+}
+
+/* Common gray hover states */
+.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-gray-100:hover,
+.dark .hover\:bg-gray-200:hover {
+  background-color: #2d2d2d;
+}
+
+.dark .hover\:text-gray-900:hover {
+  color: #ffffff;
+}
+
+/* Subtle red backgrounds used for topics and badges */
+.dark .bg-red-50:not([class*="dark:bg-"]) {
+  background-color: #3a2022;
+}
+
+.dark .bg-red-100:not([class*="dark:bg-"]) {
+  background-color: #4a2528;
+}
+
+.dark .text-red-700:not([class*="dark:text-"]) {
+  color: #f87171;
+}
+
+.dark .border-red-100:not([class*="dark:border-"]),
+.dark .border-red-200:not([class*="dark:border-"]) {
+  border-color: #7f1d1d;
+}
+
+/* Shadows look better against dark surfaces */
+.dark .shadow-sm,
+.dark .shadow,
+.dark .shadow-md {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 45%),
+    0 1px 4px rgb(0 0 0 / 25%);
+}

@@ -7,39 +7,42 @@
 {% block content %}
   <div class="min-h-screen bg-gray-100 py-6">
     <div class="mx-auto max-w-5xl px-4">
-      <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h1 class="text-2xl font-bold text-gray-900">Search results</h1>
-
-        {% if query %}
-          <p class="mt-2 text-gray-500">Results for "{{ query }}"</p>
-        {% else %}
-          <p class="mt-2 text-gray-500">Enter something to search.</p>
-        {% endif %}
-      </div>
 
       {% if query %}
+        <!-- No results -->
         {% if not topics and not users and not questions %}
-          <div class="mt-5 rounded-xl border border-gray-200 bg-white p-10 text-center shadow-sm">
-            <h2 class="text-xl font-bold text-gray-900">No results found</h2>
+          <section class="mt-5 rounded-xl border border-gray-200 bg-white px-6 py-12 text-center shadow-sm">
+            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m1.35-5.4a6.75 6.75 0 1 1-13.5 0
+                     6.75 6.75 0 0 1 13.5 0Z" />
+              </svg>
+            </div>
 
-            <p class="mt-2 text-gray-500">We could not find any questions, users, or topics matching "{{ query }}".</p>
+            <h2 class="mt-4 text-xl font-bold text-gray-900">No results found</h2>
 
-            <a href="{% url 'core:home' %}" class="mt-5 inline-block rounded-full bg-red-600 px-5 py-2 font-medium text-white hover:bg-red-700">Return home</a>
-          </div>
+            <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">We could not find any questions, users, or topics matching “{{ query }}”. Try using a different keyword.</p>
+
+            <a href="{% url 'core:home' %}" class="mt-6 inline-flex rounded-full bg-red-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-800">Return home</a>
+          </section>
         {% else %}
           <div class="mt-5 space-y-5">
             <!-- Topics -->
             {% if topics %}
-              <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                  <h2 class="text-lg font-bold text-gray-900">Topics</h2>
+              <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+                  <div>
+                    <h2 class="font-bold text-gray-900">Topics</h2>
+
+                    <p class="mt-0.5 text-xs text-gray-500">Related topics matching your search</p>
+                  </div>
 
                   <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">{{ topics|length }}</span>
                 </div>
 
-                <div class="mt-4 flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-2 p-5">
                   {% for topic in topics %}
-                    <a href="{% url 'topics:detail' topic.slug %}" class="rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-red-700 hover:bg-red-100">{{ topic.name }}</a>
+                    <a href="{% url 'topics:detail' topic.slug %}" class="rounded-full border border-red-100 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700 transition hover:border-red-200 hover:bg-red-100">{{ topic.name }}</a>
                   {% endfor %}
                 </div>
               </section>
@@ -47,29 +50,39 @@
 
             <!-- Users -->
             {% if users %}
-              <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                  <h2 class="text-lg font-bold text-gray-900">Users</h2>
+              <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+                  <div>
+                    <h2 class="font-bold text-gray-900">People</h2>
+
+                    <p class="mt-0.5 text-xs text-gray-500">Users matching your search</p>
+                  </div>
 
                   <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">{{ users|length }}</span>
                 </div>
 
-                <div class="mt-4 divide-y divide-gray-200">
+                <div class="divide-y divide-gray-200 px-5">
                   {% for user_item in users %}
-                    <a href="{% url 'users:public_profile' user_item.id %}" class="flex items-center gap-3 py-4">
+                    <a href="{% url 'users:public_profile' user_item.id %}" class="group flex items-center gap-4 py-4">
                       {% if user_item.profile.profile_picture %}
-                        <img src="{{ user_item.profile.profile_picture.url }}" alt="{{ user_item.profile.display_name }}" class="h-11 w-11 rounded-full object-cover" />
+                        <img src="{{ user_item.profile.profile_picture.url }}" alt="{{ user_item.profile.display_name }}" class="h-12 w-12 shrink-0 rounded-full object-cover ring-1 ring-gray-200" />
                       {% else %}
-                        <div class="flex h-11 w-11 items-center justify-center rounded-full bg-red-100 font-bold text-red-700">{{ user_item.profile.display_name|first|upper }}</div>
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 font-bold text-red-700 ring-1 ring-red-200">{{ user_item.profile.display_name|first|upper }}</div>
                       {% endif %}
 
-                      <div>
-                        <h3 class="font-semibold text-gray-900 hover:text-red-700">{{ user_item.profile.display_name }}</h3>
+                      <div class="min-w-0 flex-1">
+                        <h3 class="truncate font-semibold text-gray-900 transition group-hover:text-red-700">{{ user_item.profile.display_name }}</h3>
 
                         {% if user_item.profile.profession %}
-                          <p class="text-sm text-gray-500">{{ user_item.profile.profession }}</p>
+                          <p class="mt-0.5 truncate text-sm text-gray-500">{{ user_item.profile.profession }}</p>
+                        {% else %}
+                          <p class="mt-0.5 text-sm text-gray-400">View profile</p>
                         {% endif %}
                       </div>
+
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-gray-400 transition group-hover:translate-x-1 group-hover:text-red-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6" />
+                      </svg>
                     </a>
                   {% endfor %}
                 </div>
@@ -78,37 +91,69 @@
 
             <!-- Questions -->
             {% if questions %}
-              <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between">
-                  <h2 class="text-lg font-bold text-gray-900">Questions</h2>
+              <section class="rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4">
+                  <div>
+                    <h2 class="font-bold text-gray-900">Questions</h2>
+
+                    <p class="mt-0.5 text-xs text-gray-500">Questions related to your search</p>
+                  </div>
 
                   <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">{{ questions|length }}</span>
                 </div>
 
-                <div class="mt-4 space-y-4">
+                <div class="divide-y divide-gray-200">
                   {% for question in questions %}
-                    <article class="rounded-lg border border-gray-200 p-5">
+                    <article class="p-5 transition hover:bg-gray-50 sm:p-6">
+                      <!-- Author -->
+                      <div class="flex items-center gap-3">
+                        <a href="{% url 'users:public_profile' question.author.id %}" class="shrink-0">
+                          {% if question.author.profile.profile_picture %}
+                            <img src="{{ question.author.profile.profile_picture.url }}" alt="{{ question.author.profile.display_name }}" class="h-9 w-9 rounded-full object-cover ring-1 ring-gray-200" />
+                          {% else %}
+                            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200 text-xs font-bold text-gray-700">{{ question.author.profile.display_name|first|upper }}</div>
+                          {% endif %}
+                        </a>
+
+                        <div class="min-w-0">
+                          <a href="{% url 'users:public_profile' question.author.id %}" class="block truncate text-sm font-semibold text-gray-800 hover:underline">{{ question.author.profile.display_name }}</a>
+
+                          <p class="text-xs text-gray-500">Asked {{ question.created_at|timesince }} ago</p>
+                        </div>
+                      </div>
+
+                      <!-- Topics -->
                       {% with question_topics=question.topics.all %}
                         {% if question_topics %}
-                          <div class="mb-3 flex flex-wrap gap-2">
+                          <div class="mt-4 flex flex-wrap gap-2">
                             {% for topic in question_topics %}
-                              <a href="{% url 'topics:detail' topic.slug %}" class="rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-100">{{ topic.name }}</a>
+                              <a href="{% url 'topics:detail' topic.slug %}" class="rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700 transition hover:bg-red-100">{{ topic.name }}</a>
                             {% endfor %}
                           </div>
                         {% endif %}
                       {% endwith %}
 
-                      <a href="{% url 'questions:detail' question.id %}"><h3 class="text-xl font-bold text-gray-900 hover:text-red-700">{{ question.title }}</h3></a>
+                      <!-- Question content -->
+                      <a href="{% url 'questions:detail' question.id %}" class="group mt-3 block">
+                        <h3 class="text-lg font-bold leading-7 text-gray-900 transition group-hover:text-red-700 sm:text-xl">{{ question.title }}</h3>
 
-                      {% if question.description %}
-                        <p class="mt-3 text-gray-700">{{ question.description|truncatewords:40 }}</p>
+                        {% if question.description %}
+                          <p class="mt-2 line-clamp-3 text-sm leading-6 text-gray-600">{{ question.description|truncatewords:45 }}</p>
+                        {% endif %}
+                      </a>
+
+                      {% if question.image %}
+                        <a href="{% url 'questions:detail' question.id %}" class="mt-4 block overflow-hidden rounded-lg border border-gray-200 bg-gray-50"><img src="{{ question.image.url }}" alt="{{ question.title }}" class="max-h-72 w-full object-cover" /></a>
                       {% endif %}
 
-                      <p class="mt-4 text-sm text-gray-500">
-                        Asked by
-                        <a href="{% url 'users:public_profile' question.author.id %}" class="font-medium text-gray-700 hover:text-red-700">{{ question.author.profile.display_name }}</a>
-                        · {{ question.created_at|timesince }} ago
-                      </p>
+                      <!-- Open question -->
+                      <div class="mt-4">
+                        <a href="{% url 'questions:detail' question.id %}" class="inline-flex items-center gap-1 text-sm font-semibold text-red-700 transition hover:text-red-800 hover:underline">
+                          View question<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6" />
+                          </svg>
+                        </a>
+                      </div>
                     </article>
                   {% endfor %}
                 </div>
@@ -116,6 +161,20 @@
             {% endif %}
           </div>
         {% endif %}
+      {% else %}
+        <!-- Initial empty state -->
+        <section class="mt-5 rounded-xl border border-gray-200 bg-white px-6 py-12 text-center shadow-sm">
+          <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m1.35-5.4a6.75 6.75 0 1 1-13.5 0
+                   6.75 6.75 0 0 1 13.5 0Z" />
+            </svg>
+          </div>
+
+          <h2 class="mt-4 text-xl font-bold text-gray-900">Start searching</h2>
+
+          <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">Enter a keyword above to search questions, users, and topics.</p>
+        </section>
       {% endif %}
     </div>
   </div>

@@ -1,69 +1,127 @@
-{% extends "layout.html" %}
+{% extends 'layout.html' %}
 
 {% block title %}
-Login
+  Login
 {% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-    <h1 class="text-2xl font-bold text-center mb-6">
-        Login
-    </h1>
+  <div class="flex min-h-[calc(100vh-7rem)] items-center justify-center px-4 py-8">
+    <div class="w-full max-w-md">
+      <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-[#202020]">
+        <!-- Header -->
+        <div class="border-b border-gray-200 px-6 py-6 text-center dark:border-gray-700">
+          <a href="{% url 'core:home' %}" class="inline-block text-4xl font-bold tracking-tight text-red-700 dark:text-red-500">Quora</a>
 
-    {% if error_message %}
-        <p class="mb-4 text-red-600 text-center">
-            {{ error_message }}
-        </p>
-    {% endif %}
+          <h1 class="mt-5 text-2xl font-bold text-gray-900 dark:text-gray-100">Welcome back</h1>
 
-    <form method="POST" class="space-y-4">
-        {% csrf_token %}
-
-        <div>
-            <label for="email" class="block mb-1 font-medium">
-                Email
-            </label>
-
-            <input
-                type="email"
-                id="email"
-                name="email"
-                required
-                class="w-full border rounded-md px-3 py-2"
-            >
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Log in to continue to your account.</p>
         </div>
 
-        <div>
-            <label for="password" class="block mb-1 font-medium">
-                Password
-            </label>
+        <div class="p-6">
+          <!-- Login error -->
+          {% if error_message %}
+            <div class="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950">
+              <div class="flex items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mt-0.5 h-5 w-5 shrink-0 text-red-600 dark:text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0
+                       9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                </svg>
 
-            <input
-                type="password"
-                id="password"
-                name="password"
-                required
-                class="w-full border rounded-md px-3 py-2"
-            >
+                <p class="text-sm font-medium text-red-700 dark:text-red-200">{{ error_message }}</p>
+              </div>
+            </div>
+          {% endif %}
+
+          <form method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            {% if request.GET.next %}
+              <input type="hidden" name="next" value="{{ request.GET.next }}" />
+            {% endif %}
+
+            <!-- Email -->
+            <div>
+              <label for="email" class="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">Email address</label>
+
+              <input type="email" id="email" name="email" value="{{ request.POST.email|default:'' }}" required autocomplete="email" placeholder="you@example.com" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-red-500 focus:ring-1 focus:ring-red-500 dark:border-gray-600 dark:bg-[#262626] dark:text-gray-100 dark:placeholder:text-gray-500" />
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label for="password" class="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">Password</label>
+
+              <div class="relative">
+                <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Enter your password" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 pr-12 text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-red-500 focus:ring-1 focus:ring-red-500 dark:border-gray-600 dark:bg-[#262626] dark:text-gray-100 dark:placeholder:text-gray-500" />
+
+                <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-gray-500 transition hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100" aria-label="Show password" title="Show password">
+                  <!-- Eye icon -->
+                  <svg id="show-password-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12
+                         21.75 12 18 18.75 12 18.75 2.25 12
+                         2.25 12Z" />
+
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  </svg>
+
+                  <!-- Eye-slash icon -->
+                  <svg id="hide-password-icon" xmlns="http://www.w3.org/2000/svg" class="hidden h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m3 3 18 18M10.58 10.58a2 2 0 0 0
+                         2.84 2.84M9.88 4.65A10.91 10.91
+                         0 0 1 12 4.5c6 0 9.75 7.5
+                         9.75 7.5a16.7 16.7 0 0 1-2.06
+                         2.88M6.61 6.61C3.89 8.23 2.25
+                         12 2.25 12s3.75 7.5 9.75
+                         7.5a10.8 10.8 0 0 0 4.12-.81" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full rounded-lg bg-red-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-offset-[#202020]">Login</button>
+          </form>
+
+          <!-- Register -->
+          <div class="mt-6 border-t border-gray-200 pt-5 text-center dark:border-gray-700">
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Don’t have an account?
+
+              <a href="{% url 'users:register' %}{% if request.GET.next %}
+                  ?next={{ request.GET.next|urlencode }}
+                {% endif %}"
+                class="font-semibold text-red-700 transition hover:text-red-800 hover:underline dark:text-red-400 dark:hover:text-red-300">
+                Create an account
+              </a>
+            </p>
+          </div>
         </div>
+      </section>
+    </div>
+  </div>
 
-        <button
-            type="submit"
-            class="w-full bg-blue-600 text-black py-2 px-4 rounded-md hover:bg-blue-700"
-        >
-            Login
-        </button>
-    </form>
-
-    <p class="text-center mt-4 text-sm">
-        Don't have an account?
-
-        <a
-            href="{% url 'users:register' %}"
-            class="text-blue-600 hover:underline"
-        >
-            Register
-        </a>
-    </p>
-</div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const passwordInput = document.getElementById('password')
+      const toggleButton = document.getElementById('toggle-password')
+      const showIcon = document.getElementById('show-password-icon')
+      const hideIcon = document.getElementById('hide-password-icon')
+    
+      if (!passwordInput || !toggleButton) {
+        return
+      }
+    
+      toggleButton.addEventListener('click', function () {
+        const passwordIsHidden = passwordInput.type === 'password'
+    
+        passwordInput.type = passwordIsHidden ? 'text' : 'password'
+    
+        showIcon.classList.toggle('hidden', passwordIsHidden)
+        hideIcon.classList.toggle('hidden', !passwordIsHidden)
+    
+        const label = passwordIsHidden ? 'Hide password' : 'Show password'
+    
+        toggleButton.setAttribute('aria-label', label)
+        toggleButton.setAttribute('title', label)
+      })
+    })
+  </script>
 {% endblock %}

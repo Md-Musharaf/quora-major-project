@@ -1,50 +1,150 @@
-{% extends "layout.html" %}
+{% extends 'layout.html' %}
 
 {% block title %}
-Register
+  Register
 {% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-    <h1 class="text-2xl font-bold text-center mb-6">
-        Create an account
-    </h1>
+  <div class="flex min-h-[calc(100vh-7rem)] items-center justify-center px-4 py-8">
+    <div class="w-full max-w-md">
+      <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-[#202020]">
+        <!-- Header -->
+        <div class="border-b border-gray-200 px-6 py-6 text-center dark:border-gray-700">
+          <a href="{% url 'core:home' %}" class="inline-block text-4xl font-bold tracking-tight text-red-700 dark:text-red-500">Quora</a>
 
-    <form method="POST" class="space-y-4">
-        {% csrf_token %}
+          <h1 class="mt-5 text-2xl font-bold text-gray-900 dark:text-gray-100">Create an account</h1>
 
-        {{ form.non_field_errors }}
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Join the community to ask questions and share answers.</p>
+        </div>
 
-        {% for field in form %}
-            <div>
-                <label for="{{ field.id_for_label }}">
-                    {{ field.label }}
+        <div class="p-6">
+          <!-- Non-field errors -->
+          {% if form.non_field_errors %}
+            <div class="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950">
+              <div class="flex items-start gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mt-0.5 h-5 w-5 shrink-0 text-red-600 dark:text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0
+                       9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                </svg>
+
+                <div class="space-y-1">
+                  {% for error in form.non_field_errors %}
+                    <p class="text-sm font-medium text-red-700 dark:text-red-200">{{ error }}</p>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          <form method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            {% if request.GET.next %}
+              <input type="hidden" name="next" value="{{ request.GET.next }}" />
+            {% endif %}
+
+            {% for field in form %}
+              <div>
+                <label for="{{ field.id_for_label }}" class="mb-2 block text-sm font-semibold text-gray-800 dark:text-gray-200">
+                  {{ field.label }}
+
+                  {% if field.field.required %}
+                    <span class="text-red-600 dark:text-red-400">*</span>
+                  {% endif %}
                 </label>
 
-                {{ field }}
+                <!-- Field control -->
+                <div class="js-register-field relative [&_input:not([type='checkbox']):not([type='radio'])]:w-full [&_input:not([type='checkbox']):not([type='radio'])]:rounded-lg [&_input:not([type='checkbox']):not([type='radio'])]:border [&_input:not([type='checkbox']):not([type='radio'])]:border-gray-300 [&_input:not([type='checkbox']):not([type='radio'])]:bg-white [&_input:not([type='checkbox']):not([type='radio'])]:px-4 [&_input:not([type='checkbox']):not([type='radio'])]:py-3 [&_input:not([type='checkbox']):not([type='radio'])]:text-gray-900 [&_input:not([type='checkbox']):not([type='radio'])]:outline-none [&_input:not([type='checkbox']):not([type='radio'])]:transition [&_input:not([type='checkbox']):not([type='radio'])]:placeholder:text-gray-400 [&_input:not([type='checkbox']):not([type='radio'])]:focus:border-red-500 [&_input:not([type='checkbox']):not([type='radio'])]:focus:ring-1 [&_input:not([type='checkbox']):not([type='radio'])]:focus:ring-red-500 [&_textarea]:w-full [&_textarea]:rounded-lg [&_textarea]:border [&_textarea]:border-gray-300 [&_textarea]:bg-white [&_textarea]:px-4 [&_textarea]:py-3 [&_textarea]:text-gray-900 [&_textarea]:outline-none [&_textarea]:transition [&_textarea]:focus:border-red-500 [&_textarea]:focus:ring-1 [&_textarea]:focus:ring-red-500 [&_select]:w-full [&_select]:rounded-lg [&_select]:border [&_select]:border-gray-300 [&_select]:bg-white [&_select]:px-4 [&_select]:py-3 [&_select]:text-gray-900 [&_select]:outline-none [&_select]:focus:border-red-500 [&_select]:focus:ring-1 [&_select]:focus:ring-red-500 dark:[&_input:not([type='checkbox']):not([type='radio'])]:border-gray-600 dark:[&_input:not([type='checkbox']):not([type='radio'])]:bg-[#262626] dark:[&_input:not([type='checkbox']):not([type='radio'])]:text-gray-100 dark:[&_input:not([type='checkbox']):not([type='radio'])]:placeholder:text-gray-500 dark:[&_textarea]:border-gray-600 dark:[&_textarea]:bg-[#262626] dark:[&_textarea]:text-gray-100 dark:[&_select]:border-gray-600 dark:[&_select]:bg-[#262626] dark:[&_select]:text-gray-100">{{ field }}</div>
+
+                {% if field.help_text %}
+                  <div class="mt-2 text-xs leading-5 text-gray-500 dark:text-gray-400">{{ field.help_text|safe }}</div>
+                {% endif %}
 
                 {% for error in field.errors %}
-                    <p class="text-red-600 text-sm">
-                        {{ error }}
-                    </p>
+                  <p class="mt-1.5 text-sm text-red-600 dark:text-red-300">{{ error }}</p>
                 {% endfor %}
-            </div>
-        {% endfor %}
+              </div>
+            {% endfor %}
 
-        <button
-            type="submit"
-            class="w-full bg-blue-600 text-black py-2 px-4 rounded-md"
-        >
-            Register
-        </button>
-    </form>
+            <button type="submit" class="w-full rounded-lg bg-red-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-offset-[#202020]">Create account</button>
+          </form>
 
-    <p class="text-center mt-4">
-        Already have an account?
+          <!-- Login link -->
+          <div class="mt-6 border-t border-gray-200 pt-5 text-center dark:border-gray-700">
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Already have an account?
 
-        <a href="{% url 'users:login' %}" class="text-blue-600">
-            Login
-        </a>
-    </p>
-</div>
+              <a href="{% url 'users:login' %}{% if request.GET.next %}
+                  ?next={{ request.GET.next|urlencode }}
+                {% endif %}"
+                class="font-semibold text-red-700 transition hover:text-red-800 hover:underline dark:text-red-400 dark:hover:text-red-300">
+                Log in
+              </a>
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const fieldContainers = document.querySelectorAll('.js-register-field')
+    
+      fieldContainers.forEach(function (container) {
+        const passwordInput = container.querySelector("input[type='password']")
+    
+        if (!passwordInput) {
+          return
+        }
+    
+        passwordInput.classList.add('pr-12')
+    
+        const toggleButton = document.createElement('button')
+    
+        toggleButton.type = 'button'
+        toggleButton.className = 'absolute inset-y-0 right-0 flex w-12 items-center ' + 'justify-center text-gray-500 transition ' + 'hover:text-gray-800 dark:text-gray-400 ' + 'dark:hover:text-gray-100'
+    
+        toggleButton.setAttribute('aria-label', 'Show password')
+        toggleButton.setAttribute('title', 'Show password')
+    
+        toggleButton.innerHTML = `
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1.8"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M2.25 12s3.75-6.75 9.75-6.75S21.75 12
+                     21.75 12 18 18.75 12 18.75 2.25 12
+                     2.25 12Z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                />
+              </svg>
+            `
+    
+        toggleButton.addEventListener('click', function () {
+          const hidden = passwordInput.type === 'password'
+    
+          passwordInput.type = hidden ? 'text' : 'password'
+    
+          const label = hidden ? 'Hide password' : 'Show password'
+    
+          toggleButton.setAttribute('aria-label', label)
+          toggleButton.setAttribute('title', label)
+        })
+    
+        container.appendChild(toggleButton)
+      })
+    })
+  </script>
 {% endblock %}

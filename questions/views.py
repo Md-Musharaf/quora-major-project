@@ -25,28 +25,34 @@ def create_question(request):
     if request.method == "POST":
         form = QuestionForm(request.POST, request.FILES)
 
-    if form.is_valid():
-        question = form.save(commit=False)
-        question.author = request.user
-        question.save()
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.author = request.user
+            question.save()
 
-        save_question_topics(
-            question=question,
-            selected_topics=form.cleaned_data["existing_topics"],
-            new_topic_names=form.cleaned_data["new_topic_names"],
-        )
+            selected_topics = form.cleaned_data.get("existing_topics") or []
+            new_topic_names = form.cleaned_data.get("new_topics") or []
 
-        return redirect(
-            "questions:detail",
-            question_id=question.id,
-        )
+            save_question_topics(
+                question=question,
+                selected_topics=selected_topics,
+                new_topic_names=new_topic_names,
+            )
+
+            return redirect(
+                "questions:detail",
+                question_id=question.id,
+            )
+
     else:
         form = QuestionForm()
 
     return render(
         request,
         "questions/create_question.html",
-        {"form": form},
+        {
+            "form": form,
+        },
     )
 
 
@@ -163,7 +169,10 @@ def question_detail(request, question_id):
 
 @login_required
 def edit_question(request, question_id):
-    question = get_object_or_404(Question, id=question_id)
+    question = get_object_or_404(
+        Question,
+        id=question_id,
+    )
 
     if question.author != request.user:
         raise PermissionDenied
@@ -175,21 +184,30 @@ def edit_question(request, question_id):
             instance=question,
         )
 
-    if form.is_valid():
-        question = form.save()
+        if form.is_valid():
+            question = form.save()
 
-        save_question_topics(
-            question=question,
-            selected_topics=form.cleaned_data["existing_topics"],
-            new_topic_names=form.cleaned_data["new_topic_names"],
-        )
+            selected_topics = form.cleaned_data.get("existing_topics") or []
+            new_topic_names = form.cleaned_data.get("new_topics") or []
 
-        return redirect(
-            "questions:detail",
-            question_id=question.id,
-        )
+            save_question_topics(
+                question=question,
+                selected_topics=selected_topics,
+                new_topic_names=new_topic_names,
+            )
+
+            return redirect(
+                "questions:detail",
+                question_id=question.id,
+            )
+
     else:
-        form = QuestionForm(instance=question)
+        form = QuestionForm(
+            instance=question,
+            initial={
+                "existing_topics": question.topics.all(),
+            },
+        )
 
     return render(
         request,
@@ -203,19 +221,22 @@ def edit_question(request, question_id):
 
 @login_required
 def delete_question(request, question_id):
-    question = get_object_or_404(Question, id=question_id)
-
-    if question.author != request.user:
-        raise PermissionDenied
+    question = get_object_or_404(
+        Question,
+        id=question_id,
+        author=request.user,
+    )
 
     if request.method == "POST":
         question.delete()
-        return redirect("home")
+        return redirect("core:home")
 
     return render(
         request,
         "questions/delete_question.html",
-        {"question": question},
+        {
+            "question": question,
+        },
     )
 
 

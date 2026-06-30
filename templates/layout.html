@@ -1,40 +1,247 @@
 {% load static tailwind_tags %}
-{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>
       {% block title %}
-        Defalt Value
+        Quora Clone
       {% endblock %}
     </title>
+
+    <!-- 
+      Apply the saved theme before the page renders.
+      This prevents a light-theme flash when dark mode is active.
+     -->
+    <script>
+      ;(() => {
+        const savedTheme = localStorage.getItem('theme')
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      
+        const useDarkTheme = savedTheme === 'dark' || (savedTheme === null && prefersDark)
+      
+        document.documentElement.classList.toggle('dark', useDarkTheme)
+      
+        document.documentElement.style.colorScheme = useDarkTheme ? 'dark' : 'light'
+      })()
+    </script>
+
     {% tailwind_css %}
+
+    {% block extra_head %}
+
+    {% endblock %}
   </head>
-  <body>
-    <nav class="bg-black text-white p-4 text-2xl">Quora Navbar</nav>
-    <form method="GET" action="{% url 'core:search' %}" class="flex w-full items-center">
-      <input type="search" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search questions, users, or topics" class="w-full rounded-l-full border border-gray-300 px-4 py-2 outline-none focus:border-red-500" />
 
-      <button type="submit" class="rounded-r-full bg-red-600 px-5 py-2 text-white hover:bg-red-700">Search</button>
-    </form>
-    {% if user.is_authenticated %}
-      <span>Welcome, {{ user.profile.display_name }}</span>
+  <body class="min-h-screen bg-[#f1f2f2] text-gray-900 transition-colors duration-200 dark:bg-[#181818] dark:text-gray-100">
+    <!-- Main navbar -->
+    <header class="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm transition-colors dark:border-gray-700 dark:bg-[#202020]">
+      <div class="mx-auto flex h-14 max-w-[1200px] items-center gap-2 px-3 sm:gap-4 sm:px-5">
+        <!-- Logo -->
+        <a href="{% url 'core:home' %}" class="shrink-0 text-2xl font-bold tracking-tight text-red-700 sm:text-3xl dark:text-red-500">Quora</a>
 
-      <a href="{% url 'core:home' %}">Home</a>
+        <!-- Home navigation -->
+        <a href="{% url 'core:home' %}"
+          class="group flex h-12 items-center justify-center
+                 border-b-2 px-2 transition
+                 {% if request.resolver_match.url_name == 'home' %}
+            
+                   border-red-700 text-red-700
+                   dark:border-red-500 dark:text-red-500
 
-      <a href="{% url 'users:logout' %}">Logout</a>
+          {% else %}
+            
+                   border-transparent text-gray-500
+                   hover:bg-gray-100 hover:text-red-700
+                   dark:text-gray-400 dark:hover:bg-gray-800
+                   dark:hover:text-red-400
 
-      <a href="{% url 'users:profile' %}">Profile</a>
-    {% else %}
-      <a href="{% url 'users:login' %}">Login</a>
+          {% endif %}"
+          aria-label="Home"
+          title="Home">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-6 w-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 11.5 12 4l9 7.5" />
 
-      <a href="{% url 'users:register' %}">Register</a>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.5 10.5V20h13v-9.5" />
+          </svg>
+        </a>
+
+        <!-- Desktop search -->
+        <form method="GET" action="{% url 'core:search' %}" class="hidden min-w-0 flex-1 md:block">
+          <div class="relative mx-auto max-w-xl">
+            <!-- Search icon -->
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+                <circle cx="11" cy="11" r="7"></circle>
+
+                <path stroke-linecap="round" d="m20 20-3.5-3.5"></path>
+              </svg>
+            </div>
+
+            <input type="search" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search Quora" class="w-full rounded-md border border-gray-300 bg-gray-50 py-2 pl-10 pr-20 text-sm text-gray-900 outline-none transition placeholder:text-gray-500 focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-[#2b2b2b] dark:text-gray-100 dark:placeholder:text-gray-400 dark:focus:border-red-500 dark:focus:bg-[#242424] dark:focus:ring-red-500" />
+
+            <button type="submit" class="absolute right-1 top-1/2 -translate-y-1/2 rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-200 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">Search</button>
+          </div>
+        </form>
+
+        <!-- Right-side navigation -->
+        <div class="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+          <!-- Theme toggle -->
+          <button type="button" id="theme-toggle" class="flex h-9 w-9 items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-offset-[#202020]" aria-label="Switch to dark mode" title="Switch theme">
+            <!-- Moon: visible in light mode -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0 1
+                   18 15.75c-5.385 0-9.75-4.365
+                   -9.75-9.75 0-1.33.266-2.597
+                   .748-3.752A9.753 9.753 0 0 0
+                   3 11.25C3 16.635 7.365 21
+                   12.75 21a9.753 9.753 0 0 0
+                   9.002-5.998Z" />
+            </svg>
+
+            <!-- Sun: visible in dark mode -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="hidden h-5 w-5 dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1.5m0 15V21m9-9h-1.5M4.5
+                   12H3m15.364-6.364-1.06 1.06M6.697
+                   17.303l-1.061 1.061m12.728
+                   0-1.06-1.06M6.697 6.697 5.636
+                   5.636M15.75 12a3.75 3.75 0 1
+                   1-7.5 0 3.75 3.75 0 0 1
+                   7.5 0Z" />
+            </svg>
+          </button>
+
+          {% if user.is_authenticated %}
+            <!-- Profile link -->
+            <a href="{% url 'users:public_profile' user.id %}" class="flex items-center rounded-full p-1 transition hover:bg-gray-100 dark:hover:bg-gray-700" title="View profile">
+              {% if user.profile.profile_picture %}
+                <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.profile.display_name }}" class="h-8 w-8 rounded-full border border-gray-200 object-cover dark:border-gray-600" />
+              {% else %}
+                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-300 text-sm font-bold text-gray-700 dark:bg-gray-700 dark:text-gray-100">{{ user.profile.display_name|first|upper }}</div>
+              {% endif %}
+            </a>
+
+            <!-- Ask Question button -->
+            <a href="{% url 'questions:create_question' %}" class="whitespace-nowrap rounded-full bg-red-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-800 sm:px-5 dark:bg-red-600 dark:hover:bg-red-700">
+              <span class="hidden sm:inline">Add question</span>
+
+              <span class="sm:hidden">Add</span>
+            </a>
+
+            <!-- Logout -->
+            <a href="{% url 'users:logout' %}" class="hidden rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white lg:block">Logout</a>
+          {% else %}
+            <!-- Login -->
+            <a href="{% url 'users:login' %}" class="rounded-md px-3 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">Login</a>
+
+            <!-- Register -->
+            <a href="{% url 'users:register' %}" class="rounded-full border border-red-700 px-3 py-1.5 text-sm font-semibold text-red-700 transition hover:bg-red-50 sm:px-4 dark:border-red-500 dark:text-red-400 dark:hover:bg-red-950">Sign up</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Mobile search -->
+      <div class="border-t border-gray-100 px-3 py-2 dark:border-gray-700 md:hidden">
+        <form method="GET" action="{% url 'core:search' %}" class="mx-auto flex max-w-xl">
+          <div class="relative flex-1">
+            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 dark:text-gray-500">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+                <circle cx="11" cy="11" r="7"></circle>
+
+                <path stroke-linecap="round" d="m20 20-3.5-3.5"></path>
+              </svg>
+            </div>
+
+            <input type="search" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search questions, users or topics" class="w-full rounded-l-md border border-r-0 border-gray-300 bg-gray-50 py-2 pl-10 pr-3 text-sm text-gray-900 outline-none placeholder:text-gray-500 focus:border-red-600 focus:bg-white dark:border-gray-600 dark:bg-[#2b2b2b] dark:text-gray-100 dark:placeholder:text-gray-400 dark:focus:border-red-500 dark:focus:bg-[#242424]" />
+          </div>
+
+          <button type="submit" class="rounded-r-md bg-red-700 px-4 text-sm font-semibold text-white transition hover:bg-red-800 dark:bg-red-600 dark:hover:bg-red-700">Search</button>
+        </form>
+      </div>
+    </header>
+
+    <!-- Django messages -->
+    {% if messages %}
+      <div class="mx-auto mt-4 max-w-[1200px] space-y-2 px-3 sm:px-5">
+        {% for message in messages %}
+          <div class="rounded-lg border px-4 py-3 text-sm
+                   {% if message.tags == 'success' %}
+              
+                     border-green-200 bg-green-50 text-green-800
+                     dark:border-green-900 dark:bg-green-950
+                     dark:text-green-200
+
+            {% elif message.tags == 'error' %}
+              
+                     border-red-200 bg-red-50 text-red-800
+                     dark:border-red-900 dark:bg-red-950
+                     dark:text-red-200
+
+            {% elif message.tags == 'warning' %}
+              
+                     border-yellow-200 bg-yellow-50 text-yellow-800
+                     dark:border-yellow-900 dark:bg-yellow-950
+                     dark:text-yellow-200
+
+            {% else %}
+              
+                     border-blue-200 bg-blue-50 text-blue-800
+                     dark:border-blue-900 dark:bg-blue-950
+                     dark:text-blue-200
+
+            {% endif %}">{{ message }}</div>
+        {% endfor %}
+      </div>
     {% endif %}
 
-    {% block content %}
+    <!-- Main page content -->
+    <main class="mx-auto w-full max-w-[1200px] px-3 py-5 sm:px-5">
+      {% block content %}
+
+      {% endblock %}
+    </main>
+
+    <!-- Theme toggle logic -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const themeToggle = document.getElementById('theme-toggle')
+      
+        const root = document.documentElement
+      
+        if (!themeToggle) {
+          return
+        }
+      
+        const updateToggleLabel = () => {
+          const isDark = root.classList.contains('dark')
+      
+          const label = isDark ? 'Switch to light mode' : 'Switch to dark mode'
+      
+          themeToggle.setAttribute('aria-label', label)
+          themeToggle.setAttribute('title', label)
+        }
+      
+        themeToggle.addEventListener('click', () => {
+          const enableDark = !root.classList.contains('dark')
+      
+          root.classList.toggle('dark', enableDark)
+      
+          root.style.colorScheme = enableDark ? 'dark' : 'light'
+      
+          localStorage.setItem('theme', enableDark ? 'dark' : 'light')
+      
+          updateToggleLabel()
+        })
+      
+        updateToggleLabel()
+      })
+    </script>
+
+    {% block extra_scripts %}
 
     {% endblock %}
   </body>

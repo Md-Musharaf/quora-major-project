@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends "layout.html" %}
 
 {% block title %}
   Edit Question
@@ -6,93 +6,434 @@
 
 {% block content %}
   <div class="mx-auto max-w-2xl px-4 py-8">
-    <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-      <h1 class="mb-6 text-2xl font-bold text-gray-900">Edit Question</h1>
+    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 
-      <form method="POST" enctype="multipart/form-data">
+      <!-- Header -->
+      <div class="border-b border-gray-200 px-6 py-5">
+        <h1 class="text-xl font-bold text-gray-900">
+          Edit Question
+        </h1>
+
+        <p class="mt-1 text-sm text-gray-500">
+          Update your question, description, image, or topics.
+        </p>
+      </div>
+
+      <form
+        method="POST"
+        enctype="multipart/form-data"
+        class="space-y-6 p-6"
+      >
         {% csrf_token %}
 
+        <!-- Non-field errors -->
         {% if form.non_field_errors %}
-          <div class="rounded-lg border border-red-300 bg-red-50 p-3">
+          <div class="rounded-lg border border-red-200 bg-red-50 p-4">
             {% for error in form.non_field_errors %}
-              <p class="text-sm text-red-600">{{ error }}</p>
+              <p class="text-sm font-medium text-red-700">
+                {{ error }}
+              </p>
             {% endfor %}
           </div>
         {% endif %}
 
-        <div class="mb-5">
-          <label for="{{ form.title.id_for_label }}" class="mb-2 block font-semibold text-gray-700">Question</label>
-
-          {{ form.title }}
-
-          {% for error in form.title.errors %}
-            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
-          {% endfor %}
-        </div>
-
-        <div class="mb-5">
-          <label for="{{ form.description.id_for_label }}" class="mb-2 block font-semibold text-gray-700">Description</label>
-
-          {{ form.description }}
-
-          {% for error in form.description.errors %}
-            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
-          {% endfor %}
-        </div>
-
-        <div class="mb-5">
-          <label for="{{ form.image.id_for_label }}" class="mb-2 block font-semibold text-gray-700">
-            Question Image
-            <span class="font-normal text-gray-500">(optional)</span>
+        <!-- Question title -->
+        <div>
+          <label
+            for="{{ form.title.id_for_label }}"
+            class="mb-2 block text-sm font-semibold text-gray-800"
+          >
+            Question
           </label>
 
-          {% if question.image %}
-            <div class="mb-3 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-              <img src="{{ question.image.url }}" alt="Current image for {{ question.title }}" class="max-h-72 w-full object-contain" />
+          <div
+            class="[&_input]:w-full
+                   [&_input]:rounded-lg
+                   [&_input]:border
+                   [&_input]:border-gray-300
+                   [&_input]:px-4
+                   [&_input]:py-3
+                   [&_input]:text-gray-900
+                   [&_input]:outline-none
+                   [&_input]:transition
+                   [&_input]:placeholder:text-gray-400
+                   [&_input]:focus:border-red-500
+                   [&_input]:focus:ring-1
+                   [&_input]:focus:ring-red-500"
+          >
+            {{ form.title }}
+          </div>
+
+          {% for error in form.title.errors %}
+            <p class="mt-1 text-sm text-red-600">
+              {{ error }}
+            </p>
+          {% endfor %}
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label
+            for="{{ form.description.id_for_label }}"
+            class="mb-2 block text-sm font-semibold text-gray-800"
+          >
+            Description
+          </label>
+
+          <div
+            class="[&_textarea]:min-h-40
+                   [&_textarea]:w-full
+                   [&_textarea]:resize-y
+                   [&_textarea]:rounded-lg
+                   [&_textarea]:border
+                   [&_textarea]:border-gray-300
+                   [&_textarea]:px-4
+                   [&_textarea]:py-3
+                   [&_textarea]:text-gray-900
+                   [&_textarea]:outline-none
+                   [&_textarea]:transition
+                   [&_textarea]:placeholder:text-gray-400
+                   [&_textarea]:focus:border-red-500
+                   [&_textarea]:focus:ring-1
+                   [&_textarea]:focus:ring-red-500"
+          >
+            {{ form.description }}
+          </div>
+
+          {% for error in form.description.errors %}
+            <p class="mt-1 text-sm text-red-600">
+              {{ error }}
+            </p>
+          {% endfor %}
+        </div>
+
+        <!-- Question image -->
+        <div>
+          <div class="mb-2 flex items-center justify-between gap-3">
+            <label
+              for="{{ form.image.id_for_label }}"
+              class="block text-sm font-semibold text-gray-800"
+            >
+              Question Image
+              <span class="font-normal text-gray-500">
+                (optional)
+              </span>
+            </label>
+
+            {% if question.image %}
+              <span class="text-xs text-gray-500">
+                Click the image to replace it
+              </span>
+            {% endif %}
+          </div>
+
+          <!-- Hidden real file input -->
+          <input
+            type="file"
+            name="{{ form.image.html_name }}"
+            id="{{ form.image.id_for_label }}"
+            accept="image/*"
+            class="hidden"
+          />
+
+          <!-- Clickable image upload area -->
+          <label
+            for="{{ form.image.id_for_label }}"
+            id="image-upload-area"
+            class="group relative flex min-h-52 cursor-pointer items-center
+                   justify-center overflow-hidden rounded-xl border-2
+                   border-dashed border-gray-300 bg-gray-50 transition
+                   hover:border-red-400 hover:bg-red-50"
+          >
+            <!-- Image preview -->
+            <img
+              id="image-preview"
+              {% if question.image %}
+                src="{{ question.image.url }}"
+              {% endif %}
+              alt="Question image preview"
+              class="{% if not question.image %}hidden{% endif %}
+                     max-h-96 w-full object-contain"
+            />
+
+            <!-- Empty uploader placeholder -->
+            <div
+              id="image-placeholder"
+              class="{% if question.image %}hidden{% endif %}
+                     px-6 py-10 text-center"
+            >
+              <div
+                class="mx-auto mb-3 flex h-12 w-12 items-center
+                       justify-center rounded-full bg-gray-200 text-gray-600
+                       transition group-hover:bg-red-100
+                       group-hover:text-red-700"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 16.5V6.75A2.25 2.25 0 0 1
+                       5.25 4.5h13.5A2.25 2.25 0 0 1
+                       21 6.75v10.5a2.25 2.25 0 0 1
+                       -2.25 2.25H5.25A2.25 2.25 0 0 1
+                       3 17.25v-.75Zm3.75-6.75h.008v.008H6.75V9.75Zm0
+                       0A.75.75 0 1 0 6.75 8.25a.75.75 0 0 0 0
+                       1.5Zm-2.25 7.5 3.879-3.879a2.25 2.25 0 0 1
+                       3.182 0l.439.439 2.621-2.621a2.25 2.25 0 0 1
+                       3.182 0L21 14.379"
+                  />
+                </svg>
+              </div>
+
+              <p class="font-semibold text-gray-800">
+                Click to select an image
+              </p>
+
+              <p class="mt-1 text-sm text-gray-500">
+                PNG, JPG, JPEG or WEBP
+              </p>
             </div>
 
-            <p class="mb-2 text-sm text-gray-500">Select another image to replace the current one, or use the clear option to remove it.</p>
-          {% endif %}
+            <!-- Hover overlay for existing/selected image -->
+            <div
+              id="image-overlay"
+              class="{% if not question.image %}hidden{% endif %}
+                     absolute inset-0 flex items-center justify-center
+                     bg-black/0 opacity-0 transition
+                     group-hover:bg-black/40 group-hover:opacity-100"
+            >
+              <span
+                class="rounded-full bg-white px-4 py-2 text-sm
+                       font-semibold text-gray-800 shadow"
+              >
+                Change image
+              </span>
+            </div>
+          </label>
 
-          {{ form.image }}
+          <!-- Remove current image -->
+          {% if question.image %}
+            <label
+              class="mt-3 inline-flex cursor-pointer items-center gap-2
+                     text-sm text-gray-700"
+            >
+              <input
+                type="checkbox"
+                name="{{ form.image.html_name }}-clear"
+                id="{{ form.image.html_name }}-clear_id"
+                class="h-4 w-4 rounded border-gray-300 text-red-700
+                       focus:ring-red-500"
+              />
+
+              <span>Remove current image</span>
+            </label>
+          {% endif %}
 
           {% for error in form.image.errors %}
-            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+            <p class="mt-2 text-sm text-red-600">
+              {{ error }}
+            </p>
           {% endfor %}
         </div>
 
-        <!-- Existing topics -->
-        <div class="space-y-2">
-          <label class="block text-sm font-semibold text-gray-700">{{ form.existing_topics.label }}</label>
+        <!-- Topics -->
+        <div class="border-t border-gray-200 pt-6">
+          <div class="mb-4">
+            <h2 class="text-sm font-semibold text-gray-800">
+              Topics
+            </h2>
 
-          <div class="grid grid-cols-2 gap-3 rounded-lg border border-gray-300 p-4 md:grid-cols-3">{{ form.existing_topics }}</div>
+            <p class="mt-1 text-sm text-gray-500">
+              Select existing topics or enter new comma-separated topics.
+              You can use a maximum of five topics.
+            </p>
+          </div>
 
-          {% for error in form.existing_topics.errors %}
-            <p class="text-sm text-red-600">{{ error }}</p>
-          {% endfor %}
+          <!-- Existing topics -->
+          <div>
+            <label class="mb-2 block text-sm font-semibold text-gray-700">
+              {{ form.existing_topics.label }}
+            </label>
+
+            {% if form.existing_topics %}
+              <div
+                class="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto
+                       rounded-xl border border-gray-200 bg-gray-50 p-3
+                       sm:grid-cols-2"
+              >
+                {% for checkbox in form.existing_topics %}
+                  <label
+                    class="flex cursor-pointer items-center gap-3 rounded-lg
+                           border border-gray-200 bg-white px-3 py-2.5
+                           text-sm text-gray-700 transition
+                           hover:border-red-300 hover:bg-red-50
+                           [&_input]:h-4 [&_input]:w-4
+                           [&_input]:rounded [&_input]:border-gray-300
+                           [&_input]:text-red-700
+                           [&_input]:focus:ring-red-500"
+                  >
+                    {{ checkbox.tag }}
+
+                    <span>
+                      {{ checkbox.choice_label }}
+                    </span>
+                  </label>
+                {% empty %}
+                  <p class="col-span-full py-3 text-center text-sm text-gray-500">
+                    No existing topics are available.
+                  </p>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            {% for error in form.existing_topics.errors %}
+              <p class="mt-1 text-sm text-red-600">
+                {{ error }}
+              </p>
+            {% endfor %}
+          </div>
+
+          <!-- New topics -->
+          <div class="mt-5">
+            <label
+              for="{{ form.new_topics.id_for_label }}"
+              class="mb-2 block text-sm font-semibold text-gray-700"
+            >
+              {{ form.new_topics.label }}
+            </label>
+
+            <input
+              type="text"
+              name="{{ form.new_topics.html_name }}"
+              id="{{ form.new_topics.id_for_label }}"
+              value="{{ form.new_topics.value|default_if_none:'' }}"
+              placeholder="Example: Django, Python, Web Development"
+              class="w-full rounded-lg border border-gray-300 px-4 py-3
+                     text-gray-900 outline-none transition
+                     placeholder:text-gray-400 focus:border-red-500
+                     focus:ring-1 focus:ring-red-500"
+            />
+
+            {% if form.new_topics.help_text %}
+              <p class="mt-1.5 text-sm text-gray-500">
+                {{ form.new_topics.help_text }}
+              </p>
+            {% endif %}
+
+            {% for error in form.new_topics.errors %}
+              <p class="mt-1 text-sm text-red-600">
+                {{ error }}
+              </p>
+            {% endfor %}
+          </div>
         </div>
 
-        <!-- New topics -->
-        <div class="space-y-2">
-          <label for="{{ form.new_topics.id_for_label }}" class="block text-sm font-semibold text-gray-700">{{ form.new_topics.label }}</label>
+        <!-- Action buttons -->
+        <div
+          class="flex flex-col-reverse gap-3 border-t border-gray-200
+                 pt-6 sm:flex-row sm:justify-end"
+        >
+          <a
+            href="{% url 'questions:detail' question.id %}"
+            class="rounded-lg border border-gray-300 px-5 py-2.5
+                   text-center text-sm font-semibold text-gray-700
+                   transition hover:bg-gray-100"
+          >
+            Cancel
+          </a>
 
-          <input type="text" name="{{ form.new_topics.html_name }}" id="{{ form.new_topics.id_for_label }}" value="{{ form.new_topics.value|default_if_none:'' }}" placeholder="Example: Django, Python, Web Development" class="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500" />
-
-          {% if form.new_topics.help_text %}
-            <p class="text-sm text-gray-500">{{ form.new_topics.help_text }}</p>
-          {% endif %}
-
-          {% for error in form.new_topics.errors %}
-            <p class="text-sm text-red-600">{{ error }}</p>
-          {% endfor %}
-        </div>
-
-        <div class="flex items-center gap-3">
-          <button type="submit" class="rounded-md bg-red-700 px-5 py-2 text-white hover:bg-red-800">Save Changes</button>
-
-          <a href="{% url 'questions:detail' question.id %}" class="rounded-md border border-gray-300 px-5 py-2 text-gray-700 hover:bg-gray-100">Cancel</a>
+          <button
+            type="submit"
+            class="rounded-lg bg-red-700 px-5 py-2.5 text-sm
+                   font-semibold text-white transition hover:bg-red-800
+                   focus:outline-none focus:ring-2 focus:ring-red-500
+                   focus:ring-offset-2"
+          >
+            Save Changes
+          </button>
         </div>
       </form>
     </div>
   </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const fileInput = document.getElementById(
+        "{{ form.image.id_for_label }}"
+      );
+
+      const imagePreview = document.getElementById("image-preview");
+      const imagePlaceholder = document.getElementById("image-placeholder");
+      const imageOverlay = document.getElementById("image-overlay");
+
+      const removeCheckbox = document.getElementById(
+        "{{ form.image.html_name }}-clear_id"
+      );
+
+      const currentImageUrl =
+        {% if question.image %}
+          "{{ question.image.url|escapejs }}"
+        {% else %}
+          ""
+        {% endif %};
+
+      function showImage(source) {
+        imagePreview.src = source;
+        imagePreview.classList.remove("hidden");
+        imagePlaceholder.classList.add("hidden");
+        imageOverlay.classList.remove("hidden");
+      }
+
+      function showPlaceholder() {
+        imagePreview.src = "";
+        imagePreview.classList.add("hidden");
+        imagePlaceholder.classList.remove("hidden");
+        imageOverlay.classList.add("hidden");
+      }
+
+      fileInput.addEventListener("change", function () {
+        const selectedFile = this.files[0];
+
+        if (!selectedFile) {
+          if (currentImageUrl && !removeCheckbox?.checked) {
+            showImage(currentImageUrl);
+          } else {
+            showPlaceholder();
+          }
+
+          return;
+        }
+
+        if (removeCheckbox) {
+          removeCheckbox.checked = false;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+          showImage(event.target.result);
+        };
+
+        reader.readAsDataURL(selectedFile);
+      });
+
+      if (removeCheckbox) {
+        removeCheckbox.addEventListener("change", function () {
+          if (this.checked) {
+            fileInput.value = "";
+            showPlaceholder();
+          } else if (currentImageUrl) {
+            showImage(currentImageUrl);
+          }
+        });
+      }
+    });
+  </script>
 {% endblock %}

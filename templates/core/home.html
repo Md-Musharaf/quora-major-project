@@ -1,141 +1,307 @@
 {% extends 'layout.html' %}
 
 {% block title %}
-  Home
+  Home | Quora
 {% endblock %}
 
 {% block content %}
-  <div class="mx-auto max-w-3xl px-4 py-8">
-    <!-- Page heading -->
-    <div class="mb-6 flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-gray-900">Questions</h1>
+  <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-[180px_minmax(0,640px)_260px]">
+    <!-- Left sidebar -->
+    <aside class="sticky top-20 hidden lg:block">
+      <nav class="space-y-1">
+        <!-- Home -->
+        <a href="{% url 'core:home' %}" class="flex items-center gap-3 rounded-md bg-red-50 px-3 py-2.5 text-sm font-medium text-red-700 transition dark:bg-red-950/50 dark:text-red-400">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 11.5 12 4l9 7.5" />
 
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.5 10.5V20h13v-9.5" />
+          </svg>Home
+        </a>
+
+        {% if user.is_authenticated %}
+          <!-- Profile -->
+          <a href="{% url 'users:public_profile' user.id %}" class="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-gray-600 transition hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+              <circle cx="12" cy="8" r="4"></circle>
+
+              <path stroke-linecap="round" d="M4 21c.8-4.2 3.5-6.5 8-6.5s7.2 2.3 8 6.5"></path>
+            </svg>Profile
+          </a>
+
+          <!-- Ask question -->
+          <a href="{% url 'questions:create_question' %}" class="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-gray-600 transition hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+              <circle cx="12" cy="12" r="9"></circle>
+
+              <path stroke-linecap="round" d="M12 8v8M8 12h8"></path>
+            </svg>Ask question
+          </a>
+        {% endif %}
+
+        <!-- Search -->
+        <a href="{% url 'core:search' %}" class="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-gray-600 transition hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+            <circle cx="11" cy="11" r="7"></circle>
+
+            <path stroke-linecap="round" d="m20 20-3.5-3.5"></path>
+          </svg>Search
+        </a>
+      </nav>
+
+      <div class="mt-5 border-t border-gray-300 pt-4 dark:border-gray-700">
+        <p class="px-3 text-xs leading-5 text-gray-500 dark:text-gray-400">Discover questions, share knowledge, and connect with other people.</p>
+      </div>
+    </aside>
+
+    <!-- Center feed -->
+    <section class="min-w-0 space-y-3">
+      <!-- Ask question card -->
       {% if user.is_authenticated %}
-        <a href="{% url 'questions:create_question' %}" class="rounded-md bg-red-700 px-4 py-2 text-white transition hover:bg-red-800">Ask Question</a>
-      {% endif %}
-    </div>
+        <div class="rounded-md border border-gray-300 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-[#202020]">
+          <div class="flex items-center gap-3">
+            <a href="{% url 'users:public_profile' user.id %}">
+              {% if user.profile.profile_picture %}
+                <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.profile.display_name }}" class="h-10 w-10 rounded-full border border-gray-200 object-cover dark:border-gray-600" />
+              {% else %}
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-100">{{ user.profile.display_name|first|upper }}</div>
+              {% endif %}
+            </a>
 
-    <!-- Question list -->
-    <div class="space-y-5">
-      {% for question in questions %}
-        <article class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-          <!-- Question author -->
-          <div class="mb-3 flex items-center gap-3">
-            {% if question.author.profile.profile_picture %}
-              <img src="{{ question.author.profile.profile_picture.url }}" alt="{{ question.author.profile.display_name }}" class="h-10 w-10 rounded-full object-cover" />
-            {% else %}
-              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 font-bold text-gray-700">{{ question.author.profile.display_name|first|upper }}</div>
-            {% endif %}
-
-            <div>
-              <a href="{% url 'users:public_profile' user_id=question.author.id %}" class="font-semibold text-gray-900 hover:underline">{{ question.author.profile.display_name }}</a>
-
-              <p class="text-sm text-gray-500">Asked {{ question.created_at|timesince }} ago</p>
-            </div>
+            <a href="{% url 'questions:create_question' %}" class="flex-1 rounded-full border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-500 transition hover:bg-gray-100 dark:border-gray-600 dark:bg-[#2a2a2a] dark:text-gray-400 dark:hover:bg-gray-700">What do you want to ask or share?</a>
           </div>
 
-          <!-- Question Topics -->
-          {% with topics=question.topics.all %}
-            {% if topics %}
-              <div class="mb-3 flex flex-wrap gap-2">
-                {% for topic in topics %}
-                  <a href="{% url 'topics:detail' topic.slug %}" class="rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-700 transition hover:bg-red-100">{{ topic.name }}</a>
-                {% endfor %}
+          <div class="mt-3 grid grid-cols-2 divide-x divide-gray-200 border-t border-gray-100 pt-2 dark:divide-gray-700 dark:border-gray-700">
+            <a href="{% url 'questions:create_question' %}" class="flex items-center justify-center gap-2 rounded-md py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+                <circle cx="12" cy="12" r="9"></circle>
+
+                <path stroke-linecap="round" d="M9.8 9a2.4 2.4 0 0 1 4.5 1.2c0 1.8-2.3 2-2.3 3.5"></path>
+
+                <path stroke-linecap="round" d="M12 17h.01"></path>
+              </svg>Ask
+            </a>
+
+            <a href="{% url 'questions:create_question' %}" class="flex items-center justify-center gap-2 rounded-md py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 19.5 8.5 18l9.8-9.8a2.1 2.1 0 0 0-3-3L5.5 15 4 19.5Z"></path>
+              </svg>Create post
+            </a>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Feed heading -->
+      <div class="flex items-center justify-between rounded-md border border-gray-300 bg-white px-4 py-3 dark:border-gray-700 dark:bg-[#202020]">
+        <h1 class="font-semibold text-gray-900 dark:text-gray-100">Questions for you</h1>
+
+        <span class="text-xs text-gray-500 dark:text-gray-400">Latest</span>
+      </div>
+
+      <!-- Questions -->
+      {% for question in questions %}
+        <article class="overflow-hidden rounded-md border border-gray-300 bg-white shadow-sm dark:border-gray-700 dark:bg-[#202020]">
+          <div class="p-4">
+            <!-- Author information -->
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex min-w-0 items-center gap-2.5">
+                <a href="{% url 'users:public_profile' question.author.id %}" class="shrink-0">
+                  {% if question.author.profile.profile_picture %}
+                    <img src="{{ question.author.profile.profile_picture.url }}" alt="{{ question.author.profile.display_name }}" class="h-9 w-9 rounded-full border border-gray-200 object-cover dark:border-gray-600" />
+                  {% else %}
+                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gray-300 text-sm font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-100">{{ question.author.profile.display_name|first|upper }}</div>
+                  {% endif %}
+                </a>
+
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-x-1 text-sm">
+                    <a href="{% url 'users:public_profile' question.author.id %}" class="truncate font-semibold text-gray-900 hover:underline dark:text-gray-100">{{ question.author.profile.display_name }}</a>
+
+                    {% if question.author.profile.profession %}
+                      <span class="text-gray-400 dark:text-gray-500">·</span>
+
+                      <span class="truncate text-gray-500 dark:text-gray-400">{{ question.author.profile.profession }}</span>
+                    {% endif %}
+                  </div>
+
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Asked {{ question.created_at|timesince }} ago</p>
+                </div>
               </div>
+            </div>
+
+            <!-- Topics -->
+            {% with topics=question.topics.all %}
+              {% if topics %}
+                <div class="mt-3 flex flex-wrap gap-1.5">
+                  {% for topic in topics %}
+                    <a href="{% url 'topics:detail' topic.slug %}" class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600 transition hover:bg-red-50 hover:text-red-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-red-950/50 dark:hover:text-red-300">{{ topic.name }}</a>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+
+            <!-- Question title -->
+            <h2 class="mt-3 text-lg font-bold leading-snug text-gray-900 dark:text-gray-100"><a href="{% url 'questions:detail' question.id %}" class="hover:underline">{{ question.title }}</a></h2>
+
+            <!-- Description -->
+            {% if question.description %}
+              <p class="mt-2 text-[15px] leading-6 text-gray-700 dark:text-gray-300">{{ question.description|truncatewords:45 }}</p>
             {% endif %}
-          {% endwith %}
-
-          <!-- Question title -->
-          <h2 class="mb-2 text-xl font-bold text-gray-900"><a href="{% url 'questions:detail' question.id %}" class="hover:text-red-700 hover:underline">{{ question.title }}</a></h2>
-
-          <!-- Question description -->
-          {% if question.description %}
-            <p class="text-gray-700">{{ question.description|truncatewords:35 }}</p>
-          {% endif %}
+          </div>
 
           <!-- Question image -->
           {% if question.image %}
-            <a href="{% url 'questions:detail' question.id %}">
-              <div class="mt-4 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-                <img src="{{ question.image.url }}" alt="Image attached to {{ question.title }}" class="max-h-[500px] w-full object-contain" loading="lazy" />
-              </div>
-            </a>
+            <a href="{% url 'questions:detail' question.id %}" class="block border-y border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-[#181818]"><img src="{{ question.image.url }}" alt="Image attached to {{ question.title }}" class="max-h-[450px] w-full object-contain" loading="lazy" /></a>
           {% endif %}
 
-          <!-- Question statistics and voting -->
-          <div class="mt-5 flex flex-wrap items-center gap-3 border-t border-gray-200 pt-4">
-            {% if user.is_authenticated %}
-              <form method="POST" action="{% url 'interactions:toggle_question_vote' question.id %}">
-                {% csrf_token %}
+          <!-- Action bar -->
+          <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5">
+            <div class="flex items-center gap-2">
+              <!-- Upvote -->
+              {% if user.is_authenticated %}
+                <form method="POST" action="{% url 'interactions:toggle_question_vote' question.id %}">
+                  {% csrf_token %}
 
-                <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}" />
 
-                <button type="submit"
-                  class="flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition
-                  {% if question.user_has_voted %}
-                    
-                    
-                    
-                    
-                    
-                    border-red-600 bg-red-50 text-red-600
+                  <button type="submit"
+                    class="flex items-center gap-2 rounded-full border
+                           px-3 py-1.5 text-sm font-medium transition
+                           {% if question.user_has_voted %}
+                      
+                             border-red-200 bg-red-50 text-red-700
+                             hover:bg-red-100 dark:border-red-900
+                             dark:bg-red-950/50 dark:text-red-300
+                             dark:hover:bg-red-950
 
+                    {% else %}
+                      
+                             border-gray-300 bg-gray-50 text-gray-700
+                             hover:bg-gray-100 dark:border-gray-600
+                             dark:bg-[#2a2a2a] dark:text-gray-200
+                             dark:hover:bg-gray-700
 
+                    {% endif %}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m12 4-7 8h4v8h6v-8h4l-7-8Z"></path>
+                    </svg>
 
+                    {% if question.user_has_voted %}
+                      Upvoted
+                    {% else %}
+                      Upvote
+                    {% endif %}
 
+                    <span class="border-l border-current pl-2 opacity-70">{{ question.vote_count }}</span>
+                  </button>
+                </form>
+              {% else %}
+                <a href="{% url 'users:login' %}?next={{ request.get_full_path|urlencode }}" class="flex items-center gap-2 rounded-full border border-gray-300 bg-gray-50 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-gray-600 dark:bg-[#2a2a2a] dark:text-gray-200 dark:hover:bg-gray-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m12 4-7 8h4v8h6v-8h4l-7-8Z"></path>
+                  </svg>Upvote · {{ question.vote_count }}
+                </a>
+              {% endif %}
 
-                  {% else %}
-                    
-                    
-                    
-                    
-                    
-                    border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:text-red-600
+              <!-- Answers -->
+              <a href="{% url 'questions:detail' question.id %}" class="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 5h14v11H9l-4 4V5Z"></path>
+                </svg>
 
+                {{ question.answer_count }}
+                answer{{ question.answer_count|pluralize }}
+              </a>
+            </div>
 
-
-
-
-                  {% endif %}">
-                  <span aria-hidden="true">▲</span>
-
-                  {% if question.user_has_voted %}
-                    Upvoted
-                  {% else %}
-                    Upvote
-                  {% endif %}
-                </button>
-              </form>
-            {% else %}
-              <a href="{% url 'users:login' %}?next={{ request.path }}" class="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-red-500 hover:text-red-600">Log in to upvote</a>
-            {% endif %}
-
-            <span class="text-sm text-gray-500">
-              {{ question.vote_count }}
-              upvote{{ question.vote_count|pluralize }}
-            </span>
-
-            <span class="text-gray-300">•</span>
-
-            <a href="{% url 'questions:detail' question.id %}" class="text-sm text-gray-500 hover:text-red-700">
-              {{ question.answer_count }}
-              answer{{ question.answer_count|pluralize }}
+            <!-- Open question -->
+            <a href="{% url 'questions:detail' question.id %}" class="rounded-full p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white" aria-label="Open question" title="Open question">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 18 15 12 9 6"></path>
+              </svg>
             </a>
           </div>
         </article>
       {% empty %}
-        <div class="rounded-lg border border-gray-200 bg-white p-8 text-center shadow-sm">
-          <h2 class="mb-2 text-xl font-bold text-gray-900">No questions yet</h2>
+        <!-- Empty state -->
+        <div class="rounded-md border border-gray-300 bg-white px-6 py-12 text-center shadow-sm dark:border-gray-700 dark:bg-[#202020]">
+          <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-7 w-7">
+              <circle cx="12" cy="12" r="9"></circle>
 
-          <p class="mb-5 text-gray-500">Be the first person to ask a question.</p>
+              <path stroke-linecap="round" d="M12 8v8M8 12h8"></path>
+            </svg>
+          </div>
+
+          <h2 class="mt-4 text-lg font-bold text-gray-900 dark:text-gray-100">No questions yet</h2>
+
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Be the first person to start a conversation.</p>
 
           {% if user.is_authenticated %}
-            <a href="{% url 'questions:create_question' %}" class="inline-block rounded-md bg-red-700 px-5 py-2 text-white transition hover:bg-red-800">Ask the First Question</a>
+            <a href="{% url 'questions:create_question' %}" class="mt-5 inline-flex rounded-full bg-red-700 px-5 py-2 text-sm font-semibold text-white transition hover:bg-red-800 dark:bg-red-600 dark:hover:bg-red-700">Ask the first question</a>
           {% else %}
-            <a href="{% url 'users:login' %}" class="inline-block rounded-md bg-red-700 px-5 py-2 text-white transition hover:bg-red-800">Log in to Ask a Question</a>
+            <a href="{% url 'users:login' %}" class="mt-5 inline-flex rounded-full bg-red-700 px-5 py-2 text-sm font-semibold text-white transition hover:bg-red-800 dark:bg-red-600 dark:hover:bg-red-700">Log in to ask</a>
           {% endif %}
         </div>
       {% endfor %}
-    </div>
+    </section>
+
+    <!-- Right sidebar -->
+    <aside class="sticky top-20 hidden space-y-4 lg:block">
+      <!-- Improve feed -->
+      <div class="overflow-hidden rounded-md border border-gray-300 bg-white dark:border-gray-700 dark:bg-[#202020]">
+        <div class="border-b border-gray-200 px-4 py-3 dark:border-gray-700">
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Improve your feed</h2>
+        </div>
+
+        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+          <div class="flex gap-3 px-4 py-3">
+            <div class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded border border-gray-300 text-xs text-gray-500 dark:border-gray-600 dark:text-gray-400">1</div>
+
+            <p class="text-sm leading-5 text-gray-600 dark:text-gray-300">Follow topics that interest you.</p>
+          </div>
+
+          <div class="flex gap-3 px-4 py-3">
+            <div class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded border border-gray-300 text-xs text-gray-500 dark:border-gray-600 dark:text-gray-400">2</div>
+
+            <p class="text-sm leading-5 text-gray-600 dark:text-gray-300">Ask clear and useful questions.</p>
+          </div>
+
+          <div class="flex gap-3 px-4 py-3">
+            <div class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded border border-gray-300 text-xs text-gray-500 dark:border-gray-600 dark:text-gray-400">3</div>
+
+            <p class="text-sm leading-5 text-gray-600 dark:text-gray-300">Share answers with the community.</p>
+          </div>
+        </div>
+      </div>
+
+      {% if user.is_authenticated %}
+        <!-- User summary -->
+        <div class="rounded-md border border-gray-300 bg-white p-4 dark:border-gray-700 dark:bg-[#202020]">
+          <div class="flex items-center gap-3">
+            <a href="{% url 'users:public_profile' user.id %}">
+              {% if user.profile.profile_picture %}
+                <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.profile.display_name }}" class="h-11 w-11 rounded-full border border-gray-200 object-cover dark:border-gray-600" />
+              {% else %}
+                <div class="flex h-11 w-11 items-center justify-center rounded-full bg-gray-300 font-semibold text-gray-700 dark:bg-gray-700 dark:text-gray-100">{{ user.profile.display_name|first|upper }}</div>
+              {% endif %}
+            </a>
+
+            <div class="min-w-0">
+              <a href="{% url 'users:public_profile' user.id %}" class="block truncate text-sm font-semibold text-gray-900 hover:underline dark:text-gray-100">{{ user.profile.display_name }}</a>
+
+              {% if user.profile.profession %}
+                <p class="truncate text-xs text-gray-500 dark:text-gray-400">{{ user.profile.profession }}</p>
+              {% else %}
+                <p class="text-xs text-gray-500 dark:text-gray-400">View your profile</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <a href="{% url 'users:public_profile' user.id %}" class="mt-4 block rounded-full border border-gray-300 px-4 py-2 text-center text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">View profile</a>
+        </div>
+      {% endif %}
+
+      <div class="px-2 text-xs leading-5 text-gray-400 dark:text-gray-500">Quora Clone · Questions · Answers · Topics · Community</div>
+    </aside>
   </div>
-{% endblock %}u
+{% endblock %}

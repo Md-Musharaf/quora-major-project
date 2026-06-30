@@ -1,79 +1,87 @@
-<div id="comment-{{ comment.id }}" class="{% if comment.parent_id %}ml-6 border-l border-gray-200 pl-4{% endif %}">
-  <div class="flex gap-3">
+<div id="comment-{{ comment.id }}" class="{% if comment.parent_id %}ml-3 border-l-2 border-gray-200 pl-3 sm:ml-6 sm:pl-4{% endif %}">
+  <div class="flex items-start gap-3">
     <!-- Comment author image -->
-    <a href="{% url 'users:public_profile' comment.author.id %}">
+    <a href="{% url 'users:public_profile' comment.author.id %}" class="shrink-0">
       {% if comment.author.profile.profile_picture %}
-        <img src="{{ comment.author.profile.profile_picture.url }}" alt="{{ comment.author.profile.display_name }}" class="h-8 w-8 rounded-full object-cover" />
+        <img src="{{ comment.author.profile.profile_picture.url }}" alt="{{ comment.author.profile.display_name }}" class="h-8 w-8 rounded-full object-cover ring-1 ring-gray-200" />
       {% else %}
-        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-300 text-xs font-semibold text-gray-700">{{ comment.author.profile.display_name|first|upper }}</div>
+        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-bold text-gray-700 ring-1 ring-gray-300">{{ comment.author.profile.display_name|first|upper }}</div>
       {% endif %}
     </a>
 
     <div class="min-w-0 flex-1">
       <!-- Comment body -->
       <div class="rounded-xl bg-gray-100 px-4 py-3">
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
           <a href="{% url 'users:public_profile' comment.author.id %}" class="text-sm font-semibold text-gray-900 hover:underline">{{ comment.author.profile.display_name }}</a>
 
-          <span class="text-xs text-gray-500">{{ comment.created_at|timesince }} ago</span>
+          {% if comment.author.profile.profession %}
+            <span class="hidden text-xs text-gray-400 sm:inline">·</span>
 
-          {% if comment.updated_at != comment.created_at %}
-            <span class="text-xs text-gray-400">Edited</span>
+            <span class="hidden truncate text-xs text-gray-500 sm:inline">{{ comment.author.profile.profession }}</span>
           {% endif %}
         </div>
 
-        <p class="mt-1 whitespace-pre-line wrap-break-words text-sm text-gray-800">{{ comment.content }}</p>
+        <p class="mt-1 whitespace-pre-line break-words text-sm leading-6 text-gray-800">{{ comment.content }}</p>
       </div>
 
-      <!-- Reply form -->
-      <!-- Comment actions -->
-      <div class="mt-2 flex flex-wrap items-center gap-4">
-        {% if user.is_authenticated %}
-          <details>
-            <summary class="cursor-pointer list-none text-xs font-medium text-blue-600 hover:underline">Reply</summary>
+      <!-- Comment metadata and actions -->
+      <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 px-1">
+        <span class="text-xs text-gray-500">{{ comment.created_at|timesince }} ago</span>
 
-            <form method="POST" action="{% url 'comments:create_comment' answer.id %}" class="mt-2">
+        {% if comment.updated_at != comment.created_at %}
+          <span class="text-xs text-gray-400">Edited</span>
+        {% endif %}
+
+        <!-- Reply action -->
+        {% if user.is_authenticated %}
+          <details class="group">
+            <summary class="cursor-pointer list-none text-xs font-semibold text-gray-600 transition hover:text-red-700">Reply</summary>
+
+            <form method="POST" action="{% url 'comments:create_comment' answer.id %}" class="mt-3 rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
               {% csrf_token %}
 
               <input type="hidden" name="parent_id" value="{{ comment.id }}" />
 
               <input type="hidden" name="next" value="{{ request.get_full_path }}#comment-{{ comment.id }}" />
 
-              <textarea name="content" rows="2" maxlength="1000" required placeholder="Write a reply..." class="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+              <textarea name="content" rows="2" maxlength="1000" required placeholder="Write a reply..." class="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"></textarea>
 
-              <div class="mt-2 flex justify-end">
-                <button type="submit" class="rounded-full bg-blue-600 px-4 py-1.5 text-xs font-medium text-white transition hover:bg-blue-700">Reply</button>
+              <div class="mt-2 flex items-center justify-end gap-2">
+                <button type="button" onclick="this.closest('details').removeAttribute('open')" class="rounded-full px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-100">Cancel</button>
+
+                <button type="submit" class="rounded-full bg-red-700 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1">Reply</button>
               </div>
             </form>
           </details>
         {% endif %}
 
+        <!-- Author actions -->
         {% if user == comment.author %}
-          <a href="{% url 'comments:edit_comment' comment.id %}" class="text-xs font-medium text-gray-600 hover:text-gray-900 hover:underline">Edit</a>
+          <a href="{% url 'comments:edit_comment' comment.id %}" class="text-xs font-semibold text-gray-600 transition hover:text-gray-900">Edit</a>
 
-          <a href="{% url 'comments:delete_comment' comment.id %}" class="text-xs font-medium text-red-600 hover:text-red-800 hover:underline">Delete</a>
+          <a href="{% url 'comments:delete_comment' comment.id %}" class="text-xs font-semibold text-red-600 transition hover:text-red-800">Delete</a>
         {% endif %}
       </div>
     </div>
   </div>
 
   <!-- Recursive nested replies -->
-  <!-- Nested replies -->
   {% with reply_count=comment.thread_replies|length %}
     {% if reply_count %}
-      <div class="mt-3 space-y-3">
-        <!-- Show the first two replies -->
+      <div class="mt-4 space-y-4">
+        <!-- First two replies -->
         {% for reply in comment.thread_replies|slice:':2' %}
           {% include 'comments/comment_item.html' with comment=reply answer=answer %}
         {% endfor %}
 
-        <!-- Hide remaining replies -->
+        <!-- Remaining replies -->
         {% if reply_count > 2 %}
           {% with remaining=reply_count|add:'-2' %}
-            <details class="ml-6">
-              <summary class="cursor-pointer list-none text-sm font-medium text-blue-600 hover:underline">View {{ remaining }} more repl{{ remaining|pluralize:'y,ies' }}</summary>
+            <details class="ml-3 sm:ml-6">
+              <summary class="cursor-pointer list-none text-sm font-semibold text-red-700 transition hover:text-red-800 hover:underline">View {{ remaining }} more repl{{ remaining|pluralize:'y,ies' }}</summary>
 
-              <div class="mt-3 space-y-3">
+              <div class="mt-4 space-y-4">
                 {% for reply in comment.thread_replies|slice:'2:' %}
                   {% include 'comments/comment_item.html' with comment=reply answer=answer %}
                 {% endfor %}

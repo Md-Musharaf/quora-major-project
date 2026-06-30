@@ -6,6 +6,14 @@ The project supports user authentication, public profiles, questions, answers, t
 
 ---
 
+## Live Demo
+
+The application is deployed on Render from the `main` branch.
+
+**Live website:** [https://quora-major-project.onrender.com/](https://quora-major-project.onrender.com/)
+
+---
+
 ## Features
 
 ### Authentication and Profiles
@@ -316,6 +324,10 @@ python manage.py test
 
 ## Deployment Notes
 
+The project is currently deployed on Render from the `main` branch.
+
+**Production URL:** [https://quora-major-project.onrender.com/](https://quora-major-project.onrender.com/)
+
 The project can be deployed to Render as a standard Django application.
 
 A typical production setup requires:
@@ -457,5 +469,11 @@ Possible future additions include:
 
 **Md Musharaf**
 
-- GitHub: https://github.com/Md-Musharaf
+- GitHub: [md-musharaf](https://quora-major-project.onrender.com/)
 - Email: `mdraza1615@gmail.com`
+
+---
+
+## License
+
+Add the license you want to use for this project. For an open-source educational project, the MIT License is a common option.
